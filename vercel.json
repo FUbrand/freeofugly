@@ -1,0 +1,6 @@
+{
+  "rewrites": [
+    { "source": "/", "destination": "/freeofugly_ask.html" },
+    { "source": "/api/(.*)", "destination": "/api/$1" }
+  ]
+}
