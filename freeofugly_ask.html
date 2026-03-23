@@ -12,6 +12,7 @@
     --cream: #F5F2EA;
     --off-white: #F0EDE4;
     --orange: #E05A2B;
+    --orange-dim: rgba(224,90,43,0.08);
     --gray-dark: #2A2A26;
     --gray-mid: #444440;
     --gray-muted: #9A9890;
@@ -28,13 +29,16 @@
     color: var(--off-white);
     font-family: 'DM Sans', system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
+    overflow: hidden;
   }
 
   /* LAYOUT */
   .page {
-    min-height: 100vh;
+    height: 100vh;
+    height: 100dvh;
     display: flex;
     flex-direction: column;
+    overflow: hidden;
   }
 
   /* HEADER */
@@ -66,9 +70,30 @@
     color: var(--gray-mid);
   }
 
+  /* MOBILE */
+  @media (max-width: 600px) {
+    .header { padding: 0.75rem 1.25rem; }
+    .header-tag { display: none; }
+    .hero { padding: 1.25rem 1rem 0.75rem; }
+    .hero-headline { font-size: clamp(20px, 7vw, 34px) !important; margin-bottom: 0.75rem !important; }
+    .hero-sub { font-size: 13px; margin-bottom: 0.5rem !important; }
+    .hero-tag { margin-bottom: 0.75rem !important; }
+    .hero-rule { margin: 0.75rem auto !important; }
+    .suggested { padding: 0 1rem 0.75rem; }
+    .suggested-label { margin-bottom: 0.5rem; }
+    .pill { font-size: 11px; padding: 5px 10px; }
+    .chat-area { padding: 0.75rem 1rem; gap: 0.75rem; }
+    .input-area { padding: 0.6rem 1rem; }
+    .input-inner { max-width: 100%; }
+    .message-bubble { font-size: 14px; padding: 0.75rem 1rem; }
+    .message.user .message-bubble { max-width: 95%; }
+    textarea { font-size: 16px !important; }
+    .disclaimer { font-size: 7px; padding: 0.2rem 1rem 0.5rem; }
+  }
+
   /* HERO */
   .hero {
-    padding: 4rem 2rem 2rem;
+    padding: 2.5rem 2rem 1.5rem;
     max-width: 680px;
     margin: 0 auto;
     width: 100%;
@@ -86,39 +111,39 @@
     padding: 5px 12px;
     border-radius: 2px;
     display: inline-block;
-    margin-bottom: 1.5rem;
+    margin-bottom: 1rem;
   }
 
   .hero-headline {
     font-family: 'Syne', system-ui, sans-serif;
-    font-size: clamp(28px, 6vw, 48px);
+    font-size: clamp(26px, 5vw, 44px);
     font-weight: 800;
     text-transform: uppercase;
     letter-spacing: -0.02em;
     line-height: 0.95;
     color: var(--off-white);
-    margin-bottom: 1.25rem;
+    margin-bottom: 1rem;
   }
 
   .hero-sub {
     font-family: 'DM Sans', system-ui, sans-serif;
-    font-size: 15px;
+    font-size: 14px;
     font-weight: 300;
     color: var(--gray-muted);
     line-height: 1.6;
-    margin-bottom: 0.75rem;
+    margin-bottom: 0.5rem;
   }
 
   .hero-rule {
     height: 2px;
     width: 40px;
     background: var(--orange);
-    margin: 1.5rem auto;
+    margin: 1rem auto;
   }
 
   /* SUGGESTED QUESTIONS */
   .suggested {
-    padding: 0 2rem 1.5rem;
+    padding: 0 2rem 1rem;
     max-width: 680px;
     margin: 0 auto;
     width: 100%;
@@ -130,12 +155,12 @@
     letter-spacing: 0.14em;
     text-transform: uppercase;
     color: var(--gray-mid);
-    margin-bottom: 0.75rem;
+    margin-bottom: 0.6rem;
   }
 
   .suggested-pills {
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
     gap: 8px;
   }
 
@@ -145,23 +170,26 @@
     font-weight: 300;
     color: var(--gray-muted);
     border: 0.5px solid var(--border-dark);
-    padding: 7px 14px;
-    border-radius: 20px;
+    padding: 10px 14px;
+    border-radius: 6px;
     cursor: pointer;
     transition: all 0.2s;
     background: none;
     text-align: left;
+    line-height: 1.4;
   }
 
   .pill:hover {
     border-color: var(--orange);
     color: var(--off-white);
+    background: var(--orange-dim);
   }
 
   /* CHAT AREA */
   .chat-area {
     flex: 1;
     overflow-y: auto;
+    overflow-x: hidden;
     padding: 1rem 2rem;
     max-width: 680px;
     margin: 0 auto;
@@ -169,6 +197,7 @@
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
+    -webkit-overflow-scrolling: touch;
   }
 
   .message {
@@ -253,12 +282,15 @@
     40% { opacity: 1; }
   }
 
-  /* INPUT AREA */
+  /* INPUT AREA — always visible */
   .input-area {
     border-top: 0.5px solid var(--border-dark);
     padding: 1.25rem 2rem;
     flex-shrink: 0;
     background: var(--black);
+    position: sticky;
+    bottom: 0;
+    z-index: 50;
   }
 
   .input-inner {
@@ -399,6 +431,7 @@
 </div>
 
 <script>
+// System prompt lives on the backend (Muhammad's /api/chat endpoint)
 let messages = [];
 let isLoading = false;
 
