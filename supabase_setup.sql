@@ -21,6 +21,57 @@ CREATE TABLE IF NOT EXISTS chat_messages (
   sent_at TIMESTAMPTZ NOT NULL
 );
 
+-- ============================================
+-- NEW TABLES: carousel_log, trusted_voices, topic_bank
+-- ============================================
+
+-- Table: carousel_log
+-- Every generated carousel is written here automatically.
+-- Generator reads this to avoid repeating topics. Status tracks lifecycle.
+CREATE TABLE IF NOT EXISTS carousel_log (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  date_created TIMESTAMPTZ DEFAULT now(),
+  topic TEXT,
+  pillar TEXT,
+  slide_copy TEXT,
+  caption TEXT,
+  hashtags TEXT,
+  status TEXT DEFAULT 'generated' CHECK (status IN ('generated', 'approved', 'posted')),
+  posted_date DATE
+);
+
+-- Table: trusted_voices
+-- Library of influencers and researchers used to inform tone and references.
+-- Generator reads active voices and passes them into the system prompt.
+CREATE TABLE IF NOT EXISTS trusted_voices (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  name TEXT NOT NULL,
+  expertise TEXT,
+  talking_points TEXT,
+  active BOOLEAN DEFAULT true
+);
+
+-- Table: topic_bank
+-- Running list of content ideas. Generator reads pending topics first on run.
+-- Status flips to 'used' automatically after generation.
+CREATE TABLE IF NOT EXISTS topic_bank (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  topic TEXT NOT NULL,
+  pillar TEXT,
+  priority TEXT DEFAULT 'normal' CHECK (priority IN ('high', 'normal', 'low')),
+  notes TEXT,
+  status TEXT DEFAULT 'pending' CHECK (status IN ('pending', 'used'))
+);
+
+-- Seed default trusted voices
+INSERT INTO trusted_voices (name, expertise, talking_points, active) VALUES
+  ('Scott Galloway', 'Young men in crisis, masculinity, economic mobility', 'Male loneliness epidemic, no group has fallen further faster, aspirational masculinity', true),
+  ('Peter Attia', 'Longevity, metabolic health', 'Zone 2 cardio, VO2 max, ApoB, lifespan vs healthspan, strength training for longevity', true),
+  ('Rhonda Patrick', 'Micronutrients, cellular health', 'Omega 3s, Vitamin D, heat and cold exposure, magnesium, senescence', true)
+ON CONFLICT DO NOTHING;
+
+-- ============================================
+
 -- Insert the initial system prompt
 INSERT INTO system_prompts (name, prompt, active) VALUES (
   'freeofugly_ask',
