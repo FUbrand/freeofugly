@@ -870,39 +870,6 @@ function renderVoices() {
 
 // ─── WEEKLY GENERATOR ─────────────────────────────────────────────────────
 
-  return `You are the content strategist for Free of Ugly — a science-first men's health and wellness brand. Generate exactly 3 carousel concepts for Instagram.
-
-BRAND VOICE: Dry, witty, science-grounded, slightly confrontational. Never preachy. The enemy is bad information not the person who believed it. Looking good and feeling good are the same signal.
-
-CONTENT PILLARS (rotate across them, don't repeat same pillar twice):
-- Myth busting: Hook with a lie, deliver the science, practical takeaway
-- Young men: Galloway-adjacent, cultural, emotional, broadly shareable  
-- Science explainer: Mechanism-first, makes people feel informed not sold to
-- Supplements: Evidence-based, calls out grift, specific ingredients
-- For the audience: Written for partners and mothers of men, high sharing velocity
-${voicesText}${topicsText}${avoidText}
-
-For each carousel concept return EXACTLY this JSON structure:
-{
-  "carousels": [
-    {
-      "topic": "Short topic name",
-      "pillar": "pillar name",
-      "angle": "One sentence on the unique angle or hook",
-      "slides": [
-        {"tag": "tag text", "type": "hook|myth|reality|list|close", "content": "slide copy"},
-        {"tag": "tag text", "type": "myth", "content": "slide copy"},
-        {"tag": "tag text", "type": "reality", "content": "slide copy"},
-        {"tag": "tag text", "type": "myth|reality|list", "content": "slide copy or comma-separated list items"},
-        {"tag": "tag text", "type": "reality|myth", "content": "slide copy"},
-        {"tag": "Free of Ugly.", "type": "close", "content": "closing statement", "cta": "link in bio CTA text"}
-      ],
-      "caption": "Full Instagram caption with hook, 2-3 lines expanding the point, and CTA ending with ask anything dash link in bio",
-      "hashtags": "15 relevant hashtags space separated"
-    }
-  ]
-}
-
 async function runGenerator() {
   const btn = document.getElementById('gen-btn');
   const loading = document.getElementById('gen-loading');
