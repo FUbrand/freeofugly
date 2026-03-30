@@ -14,6 +14,3 @@
     "puppeteer-core": "^22.0.0"
   }
 }
-Make sure there are no extra characters before or after. Commit and check Vercel again.
-
-
