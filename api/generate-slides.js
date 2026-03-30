@@ -2,23 +2,13 @@ const { createClient } = require("@supabase/supabase-js");
 const satori = require("satori").default;
 const { Resvg } = require("@resvg/resvg-js");
 const JSZip = require("jszip");
-const https = require("https");
+const fs = require("fs");
+const path = require("path");
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_SERVICE_KEY
 );
-
-function fetchFont(url) {
-  return new Promise((resolve, reject) => {
-    https.get(url, (res) => {
-      const chunks = [];
-      res.on("data", (chunk) => chunks.push(chunk));
-      res.on("end", () => resolve(Buffer.concat(chunks)));
-      res.on("error", reject);
-    }).on("error", reject);
-  });
-}
 
 const COLORS = {
   black: "#0D0D0B",
@@ -117,11 +107,12 @@ module.exports = async function handler(req, res) {
       return res.status(400).json({ error: "No slide data found. This carousel was generated before slide storage was added — please regenerate it." });
     }
 
-   const [syneFont, spaceMono, dmSans] = await Promise.all([
-  fetchFont("https://fonts.gstatic.com/s/syne/v22/8vIS7w4qzmVxsWxjBZRjr0FKM_04uQ.ttf"),
-  fetchFont("https://fonts.gstatic.com/s/spacemono/v13/i7dPIFZifjKcF5UAWdDRYEF8RQ.ttf"),
-  fetchFont("https://fonts.gstatic.com/s/dmsans/v15/rP2Yp2ywxg089UriI5-g4vlH9VoD8Cmcqbu6-K63MA.ttf"),
-]);
+   const fontsDir = path.join(process.cwd(), "fonts");
+const [syneFont, spaceMono, dmSans] = [
+  fs.readFileSync(path.join(fontsDir, "Syne-ExtraBold.ttf")),
+  fs.readFileSync(path.join(fontsDir, "SpaceMono-Bold.ttf")),
+  fs.readFileSync(path.join(fontsDir, "DMSans-Light.ttf")),
+];
 
     const fontConfig = [
       { name: "Syne", data: syneFont, weight: 800, style: "normal" },
