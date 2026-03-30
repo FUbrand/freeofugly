@@ -3,6 +3,10 @@
     { "source": "/", "destination": "/freeofugly_ask.html" },
     { "source": "/dashboard", "destination": "/FreeOfUgly_Dashboard.html" },
     { "source": "/api/(.*)", "destination": "/api/$1" }
-  ]
+  ],
+  "functions": {
+    "api/generate-slides.js": {
+      "maxDuration": 60
+    }
+  }
 }
-  
