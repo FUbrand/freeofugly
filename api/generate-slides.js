@@ -117,11 +117,11 @@ module.exports = async function handler(req, res) {
       return res.status(400).json({ error: "No slide data found. This carousel was generated before slide storage was added — please regenerate it." });
     }
 
-    const [syneFont, spaceMono, dmSans] = await Promise.all([
-      fetchFont("https://fonts.gstatic.com/s/syne/v22/8vIS7w4qzmVxsWxjBZRjr0FKM_04uQ.woff"),
-      fetchFont("https://fonts.gstatic.com/s/spacemono/v13/i7dPIFZifjKcF5UAWdDRYEF8RQ.woff"),
-      fetchFont("https://fonts.gstatic.com/s/dmsans/v15/rP2Yp2ywxg089UriI5-g4vlH9VoD8Cmcqbu6-K63MA.woff"),
-    ]);
+   const [syneFont, spaceMono, dmSans] = await Promise.all([
+  fetchFont("https://fonts.gstatic.com/s/syne/v22/8vIS7w4qzmVxsWxjBZRjr0FKM_04uQ.ttf"),
+  fetchFont("https://fonts.gstatic.com/s/spacemono/v13/i7dPIFZifjKcF5UAWdDRYEF8RQ.ttf"),
+  fetchFont("https://fonts.gstatic.com/s/dmsans/v15/rP2Yp2ywxg089UriI5-g4vlH9VoD8Cmcqbu6-K63MA.ttf"),
+]);
 
     const fontConfig = [
       { name: "Syne", data: syneFont, weight: 800, style: "normal" },
