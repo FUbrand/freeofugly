@@ -109,9 +109,9 @@ module.exports = async function handler(req, res) {
 
    const fontsDir = path.join(process.cwd(), "fonts");
 const [syneFont, spaceMono, dmSans] = [
-  fs.readFileSync(path.join(fontsDir, "Syne-ExtraBold.ttf")),
+  fs.readFileSync(path.join(fontsDir, "Syne[wght].ttf")),
   fs.readFileSync(path.join(fontsDir, "SpaceMono-Bold.ttf")),
-  fs.readFileSync(path.join(fontsDir, "DMSans-Light.ttf")),
+  fs.readFileSync(path.join(fontsDir, "DMSans-Regular.ttf")),
 ];
 
     const fontConfig = [
