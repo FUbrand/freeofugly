@@ -1127,9 +1127,11 @@ function renderGeneratorHistory() {
   const statusColors = { generated:'tag-blue', approved:'tag-orange', posted:'tag-green' };
   tbody.innerHTML = data.carousels.map(c => {
     const dateStr = c.date_created ? new Date(c.date_created).toISOString().split('T')[0] : (c.date || '—');
-    const markBtn = c.status === 'approved'
-      ? `<button class="btn btn-green" onclick="markPosted('${c.id}')" style="font-size:8px;padding:5px 10px;">Mark Posted</button>`
-      : '';
+ const markBtn = c.status === 'approved'
+  ? `<button class="btn btn-green" onclick="markPosted('${c.id}')" style="font-size:8px;padding:5px 10px;">Mark Posted</button>`
+  : c.status === 'generated'
+  ? `<button class="btn" onclick="approveAndDownload('${c.id}','${(c.topic||'').replace(/'/g,"\\'")}')" style="font-size:8px;padding:5px 10px;">Approve + Get Slides</button>`
+  : '';
     return `<tr>
       <td style="font-family:'Space Mono',monospace;font-size:11px;">${dateStr}</td>
       <td>${c.topic || '—'}</td>
@@ -1236,7 +1238,38 @@ async function loadFromBackend() {
     return false;
   }
 }
-
+async function approveAndDownload(id, topic) {
+  const btn = event.target;
+  btn.disabled = true;
+  btn.textContent = 'Generating...';
+  try {
+    const res = await fetch('/api/generate-slides', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ carousel_id: id })
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error || 'Failed');
+    }
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = (topic.replace(/[^a-zA-Z0-9]/g,'_').substring(0,24)) + '_slides.zip';
+    a.click();
+    URL.revokeObjectURL(url);
+    btn.textContent = 'Downloaded';
+    btn.classList.remove('btn');
+    btn.classList.add('btn-green');
+    await loadFromBackend();
+    renderGenerator();
+  } catch(err) {
+    btn.disabled = false;
+    btn.textContent = 'Approve + Get Slides';
+    alert('Slide generation failed: ' + err.message);
+  }
+}
 async function markPosted(id) {
   const today = new Date().toISOString().split('T')[0];
   try {
