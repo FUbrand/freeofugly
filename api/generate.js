@@ -126,15 +126,16 @@ module.exports = async function handler(req, res) {
         .join("\n");
 
       const { data: inserted, error: insertError } = await supabase
-        .from("carousel_log")
-        .insert({
-          topic: carousel.topic,
-          pillar: carousel.pillar,
-          slide_copy: slideCopy,
-          caption: carousel.caption,
-          hashtags: carousel.hashtags,
-          status: "generated",
-        })
+  .from("carousel_log")
+  .insert({
+    topic: carousel.topic,
+    pillar: carousel.pillar,
+    slide_copy: slideCopy,
+    slides_json: carousel.slides || [],
+    caption: carousel.caption,
+    hashtags: carousel.hashtags,
+    status: "generated",
+  })
         .select()
         .single();
 
