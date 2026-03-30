@@ -1,5 +1,5 @@
 const { createClient } = require("@supabase/supabase-js");
-const chromium = require("@sparticuz/chromium-min");
+const chromium = require("@sparticuz/chromium");
 const puppeteer = require("puppeteer-core");
 const JSZip = require("jszip");
 
@@ -127,15 +127,12 @@ module.exports = async function handler(req, res) {
     if (!slides || !slides.length) return res.status(400).json({ error: "No slide data found for this carousel. It may have been generated before slide storage was added — regenerate it from the Weekly Generator." });
 
     // Launch Puppeteer with Chromium
-    const browser = await puppeteer.launch({
-      args: chromium.args,
-      defaultViewport: { width: 1080, height: 1350 },
-      executablePath: await chromium.executablePath(
-        "https://github.com/Sparticuz/chromium/releases/download/v131.0.1/chromium-v131.0.1-pack.tar"
-      ),
-      headless: chromium.headless,
-    });
-
+   const browser = await puppeteer.launch({
+  args: chromium.args,
+  defaultViewport: { width: 1080, height: 1350 },
+  executablePath: await chromium.executablePath(),
+  headless: chromium.headless,
+});
     const zip = new JSZip();
     const topicSlug = (carousel.topic || "carousel").replace(/[^a-zA-Z0-9]/g, "_").substring(0, 24);
 
