@@ -124,7 +124,12 @@ const [syneFont, spaceMono, dmSans] = [
     const topicSlug = (carousel.topic || "carousel").replace(/[^a-zA-Z0-9]/g, "_").substring(0, 24);
 
     for (let i = 0; i < slides.length; i++) {
-      const element = buildSlideElement(slides[i], i + 1, slides.length);
+  const slide = slides[i];
+  if (!slide || !slide.type || !slide.content) {
+    console.error(`Slide ${i + 1} is missing required fields:`, slide);
+    continue;
+  }
+  const element = buildSlideElement(slide, i + 1, slides.length);
       const svg = await satori(element, { width: 1080, height: 1350, fonts: fontConfig });
       const resvg = new Resvg(svg, { fitTo: { mode: "width", value: 1080 } });
       const pngBuffer = resvg.render().asPng();
