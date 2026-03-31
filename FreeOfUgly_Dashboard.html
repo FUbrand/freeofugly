@@ -556,16 +556,24 @@ function showConfirm(id) {
 // ─── BACKEND ─────────────────────────────────────────────────────────────────
 async function loadFromBackend() {
   try {
-    const [tv, tb, cl, ql] = await Promise.all([
+    const [tv, tb, cl, ql, pl] = await Promise.all([
       fetch('/api/trusted-voices').then(r => r.json()).catch(() => []),
       fetch('/api/topic-bank').then(r => r.json()).catch(() => []),
       fetch('/api/carousel-log').then(r => r.json()).catch(() => []),
       fetch('/api/questions').then(r => r.json()).catch(() => []),
+      fetch('/api/posts').then(r => r.json()).catch(() => []),
     ]);
     if (Array.isArray(tv) && tv.length) data.voices = tv;
     if (Array.isArray(tb)) data.topics = tb;
     if (Array.isArray(cl)) data.carousels = cl;
     if (Array.isArray(ql)) data.questions = ql;
+    if (Array.isArray(pl) && pl.length) {
+      // Map Supabase field names to dashboard field names
+      data.posts = pl.map(p => ({
+        ...p,
+        newFollowers: p.new_followers || 0,
+      }));
+    }
     saveData();
     updateQueueBadge();
     return true;
@@ -837,27 +845,47 @@ async function confirmMarkPosted() {
   const followers = document.getElementById('modal-followers').value;
   const item = data.queue.find(q => String(q.id) === String(id));
   if (!item) { closeModal(); return; }
-  const post = {
-    id: item.id, topic: item.topic, pillar: item.pillar,
-    date, followers: parseInt(followers) || 0,
-    likes: 0, saves: 0, comments: 0, shares: 0, newFollowers: 0, reach: 0,
-    stories: (item.stories || []).length > 0,
-    status: 'posted'
-  };
-  data.posts = data.posts.filter(p => String(p.id) !== String(id));
-  data.posts.unshift(post);
+
+  // Write to Supabase posts table
+  try {
+    const res = await fetch('/api/posts', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        topic: item.topic, pillar: item.pillar, date,
+        followers: parseInt(followers) || 0,
+        likes: 0, saves: 0, comments: 0, shares: 0,
+        new_followers: 0, reach: 0,
+        stories: (item.stories || []).length > 0,
+        status: 'posted'
+      })
+    });
+    if (res.ok) {
+      const saved = await res.json();
+      data.posts = data.posts.filter(p => String(p.id) !== String(id));
+      data.posts.unshift({ ...saved, newFollowers: saved.new_followers || 0 });
+    }
+  } catch(e) {
+    // Fallback to local if backend fails
+    data.posts.unshift({
+      id: Date.now(), topic: item.topic, pillar: item.pillar,
+      date, followers: parseInt(followers)||0,
+      likes:0, saves:0, comments:0, shares:0, newFollowers:0, reach:0,
+      stories: (item.stories||[]).length > 0, status:'posted'
+    });
+  }
+
+  // Update carousel_log status if it has a real Supabase ID
+  if (item.id && String(item.id).length < 13) {
+    try { await fetch('/api/carousel-log', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: item.id, status: 'posted', posted_date: date }) }); } catch(e) {}
+  }
+
   data.queue = data.queue.filter(q => String(q.id) !== String(id));
   saveData();
   updateQueueBadge();
-  if (item.id && typeof item.id === 'number' && item.id > 1000000000000) {
-    // local ID, no backend update needed
-  } else {
-    try {
-      await fetch('/api/carousel-log', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: item.id, status: 'posted', posted_date: date }) });
-    } catch(e) {}
-  }
   closeModal();
   renderQueue();
+  renderOverview();
 }
 
 // ─── TOPIC BANK ───────────────────────────────────────────────────────────────
@@ -960,16 +988,33 @@ function renderVoices() {
 }
 
 // ─── PERFORMANCE & POSTS ─────────────────────────────────────────────────────
-function updatePostStat(id, field, val) {
+async function updatePostStat(id, field, val) {
   const post = data.posts.find(p => String(p.id) === String(id));
   if (!post) return;
-  post[field] = parseInt(val) || 0;
+  const numVal = parseInt(val) || 0;
+  post[field] = numVal;
+  // Map dashboard field name to Supabase column name
+  const dbField = field === 'newFollowers' ? 'new_followers' : field;
+  try {
+    await fetch('/api/posts', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, [dbField]: numVal })
+    });
+  } catch(e) {}
   saveData();
   renderOverview();
 }
 
-function deletePost(id) {
+async function deletePost(id) {
   data.posts = data.posts.filter(p => String(p.id) !== String(id));
+  try {
+    await fetch('/api/posts', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id })
+    });
+  } catch(e) {}
   saveData();
   renderPerformance();
   renderOverview();
