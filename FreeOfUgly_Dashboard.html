@@ -589,11 +589,9 @@ async function loadFromBackend() {
     }
     if (Array.isArray(ql)) data.questions = ql;
     if (Array.isArray(pl) && pl.length) {
-      // Map Supabase field names to dashboard field names
-      data.posts = pl.map(p => ({
-        ...p,
-        newFollowers: p.new_followers || 0,
-      }));
+      data.posts = pl
+        .filter(p => p.status === 'posted')
+        .map(p => ({ ...p, newFollowers: p.new_followers || 0 }));
     }
     saveData();
     updateQueueBadge();
