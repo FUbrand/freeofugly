@@ -9,41 +9,42 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <style>
   :root {
-    --black: #0D0D0B; --off-black: #191917; --card: #1E1E1C;
-    --orange: #E05A2B; --orange-dim: rgba(224,90,43,0.12);
+    --black: #0D0D0B; --off-black: #191917; --card: #FFFFFF;
+    --orange: #E05A2B; --orange-dim: rgba(224,90,43,0.08);
     --cream: #F5F2EA; --off-white: #F0EDE4;
-    --gray-dark: #2A2A26; --gray-mid: #444440; --gray-muted: #9A9890; --gray-light: #CCCAC0;
-    --border: #2A2A26; --green: #4CAF7D; --green-dim: rgba(76,175,125,0.12);
-    --blue: #5B9BD5; --blue-dim: rgba(91,155,213,0.12);
+    --gray-dark: #2A2A26; --gray-mid: #6B6B66; --gray-muted: #9A9890; --gray-light: #CCCAC0;
+    --border: #E8E5DC; --green: #3A9E6B; --green-dim: rgba(58,158,107,0.1);
+    --blue: #4A87C5; --blue-dim: rgba(74,135,197,0.1);
+    --bg: #F7F5EF; --sidebar-bg: #0D0D0B; --text-primary: #1A1A18; --text-secondary: #6B6B66;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'DM Sans', system-ui, sans-serif; background: var(--black); color: var(--off-white); min-height: 100vh; -webkit-font-smoothing: antialiased; }
+  body { font-family: 'DM Sans', system-ui, sans-serif; background: var(--bg); color: var(--text-primary); min-height: 100vh; -webkit-font-smoothing: antialiased; }
   .layout { display: flex; min-height: 100vh; }
-  .sidebar { width: 220px; background: var(--off-black); border-right: 0.5px solid var(--border); display: flex; flex-direction: column; flex-shrink: 0; position: fixed; top: 0; left: 0; height: 100vh; z-index: 100; overflow-y: auto; }
-  .sidebar-logo { padding: 1.5rem; border-bottom: 0.5px solid var(--border); }
-  .logo-mark { font-family: 'Syne', system-ui, sans-serif; font-size: 16px; font-weight: 800; text-transform: uppercase; letter-spacing: -0.02em; color: var(--off-white); }
+  .sidebar { width: 220px; background: var(--sidebar-bg); border-right: none; display: flex; flex-direction: column; flex-shrink: 0; position: fixed; top: 0; left: 0; height: 100vh; z-index: 100; overflow-y: auto; }
+  .sidebar-logo { padding: 1.5rem; border-bottom: 0.5px solid rgba(255,255,255,0.08); }
+  .logo-mark { font-family: 'Syne', system-ui, sans-serif; font-size: 16px; font-weight: 800; text-transform: uppercase; letter-spacing: -0.02em; color: #F0EDE4; }
   .logo-mark span { color: var(--orange); }
-  .logo-sub { font-family: 'Space Mono', monospace; font-size: 7px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gray-mid); margin-top: 4px; }
+  .logo-sub { font-family: 'Space Mono', monospace; font-size: 7px; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(255,255,255,0.3); margin-top: 4px; }
   .sidebar-nav { flex: 1; padding: 1rem 0; }
-  .nav-section-label { font-family: 'Space Mono', monospace; font-size: 7px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--gray-mid); padding: 0.75rem 1.5rem 0.25rem; }
-  .nav-item { display: flex; align-items: center; gap: 10px; padding: 0.6rem 1.5rem; font-size: 13px; font-weight: 300; color: var(--gray-muted); cursor: pointer; transition: all 0.15s; border-left: 2px solid transparent; }
-  .nav-item:hover { color: var(--off-white); background: rgba(255,255,255,0.03); }
-  .nav-item.active { color: var(--orange); border-left-color: var(--orange); background: var(--orange-dim); }
+  .nav-section-label { font-family: 'Space Mono', monospace; font-size: 7px; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(255,255,255,0.25); padding: 0.75rem 1.5rem 0.25rem; }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 0.6rem 1.5rem; font-size: 13px; font-weight: 300; color: rgba(255,255,255,0.45); cursor: pointer; transition: all 0.15s; border-left: 2px solid transparent; }
+  .nav-item:hover { color: rgba(255,255,255,0.85); background: rgba(255,255,255,0.05); }
+  .nav-item.active { color: var(--orange); border-left-color: var(--orange); background: rgba(224,90,43,0.1); }
   .nav-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
-  .sidebar-footer { padding: 1rem 1.5rem; border-top: 0.5px solid var(--border); font-family: 'Space Mono', monospace; font-size: 7px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--gray-mid); }
+  .sidebar-footer { padding: 1rem 1.5rem; border-top: 0.5px solid rgba(255,255,255,0.08); font-family: 'Space Mono', monospace; font-size: 7px; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.2); }
   .main { margin-left: 220px; flex: 1; padding: 2rem; max-width: calc(100vw - 220px); }
   .page { display: none; }
   .page.visible { display: block; }
   .page-header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 0.5px solid var(--border); flex-wrap: wrap; gap: 0.5rem; }
-  .page-title { font-family: 'Syne', system-ui, sans-serif; font-size: 24px; font-weight: 800; text-transform: uppercase; letter-spacing: -0.02em; color: var(--off-white); }
-  .page-date { font-family: 'Space Mono', monospace; font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--gray-mid); }
+  .page-title { font-family: 'Syne', system-ui, sans-serif; font-size: 24px; font-weight: 800; text-transform: uppercase; letter-spacing: -0.02em; color: var(--text-primary); }
+  .page-date { font-family: 'Space Mono', monospace; font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-secondary); }
   .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 2rem; }
   .stat-card { background: var(--card); border: 0.5px solid var(--border); border-radius: 8px; padding: 1.25rem; }
   .stat-card.accent-orange { border-left: 2px solid var(--orange); }
   .stat-card.accent-green { border-left: 2px solid var(--green); }
   .stat-card.accent-blue { border-left: 2px solid var(--blue); }
-  .stat-label { font-family: 'Space Mono', monospace; font-size: 8px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gray-mid); margin-bottom: 0.5rem; }
-  .stat-value { font-family: 'Syne', system-ui, sans-serif; font-size: 32px; font-weight: 800; color: var(--off-white); line-height: 1; margin-bottom: 4px; }
+  .stat-label { font-family: 'Space Mono', monospace; font-size: 8px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 0.5rem; }
+  .stat-value { font-family: 'Syne', system-ui, sans-serif; font-size: 32px; font-weight: 800; color: var(--text-primary); line-height: 1; margin-bottom: 4px; }
   .stat-change { font-family: 'Space Mono', monospace; font-size: 9px; color: var(--green); }
   .charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 2rem; }
   .chart-card { background: var(--card); border: 0.5px solid var(--border); border-radius: 8px; padding: 1.5rem; }
@@ -57,10 +58,10 @@
   .table-title { font-family: 'Space Mono', monospace; font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--orange); }
   table { width: 100%; border-collapse: collapse; }
   thead tr { border-bottom: 0.5px solid var(--border); }
-  th { font-family: 'Space Mono', monospace; font-size: 8px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--gray-mid); padding: 0.75rem 1.5rem; text-align: left; font-weight: 400; }
-  td { font-size: 13px; font-weight: 300; color: var(--off-white); padding: 0.75rem 1.5rem; border-bottom: 0.5px solid rgba(42,42,38,0.5); }
+  th { font-family: 'Space Mono', monospace; font-size: 8px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-secondary); padding: 0.75rem 1.5rem; text-align: left; font-weight: 400; }
+  td { font-size: 13px; font-weight: 400; color: var(--text-primary); padding: 0.75rem 1.5rem; border-bottom: 0.5px solid var(--border); }
   tbody tr:last-child td { border-bottom: none; }
-  tbody tr:hover { background: rgba(255,255,255,0.02); }
+  tbody tr:hover { background: rgba(224,90,43,0.03); }
   .tag-pill { font-family: 'Space Mono', monospace; font-size: 8px; letter-spacing: 0.1em; text-transform: uppercase; padding: 3px 8px; border-radius: 2px; display: inline-block; }
   .tag-orange { background: var(--orange-dim); color: var(--orange); }
   .tag-green { background: var(--green-dim); color: var(--green); }
@@ -70,10 +71,10 @@
   .form-title { font-family: 'Space Mono', monospace; font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--orange); margin-bottom: 1.25rem; }
   .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 1rem; }
   .form-group { display: flex; flex-direction: column; gap: 6px; }
-  label { font-family: 'Space Mono', monospace; font-size: 8px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--gray-mid); }
-  input, select, textarea { background: var(--off-black); border: 0.5px solid var(--border); border-radius: 4px; padding: 8px 12px; font-family: 'DM Sans', system-ui, sans-serif; font-size: 13px; font-weight: 300; color: var(--off-white); outline: none; transition: border-color 0.15s; }
+  label { font-family: 'Space Mono', monospace; font-size: 8px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-secondary); }
+  input, select, textarea { background: #FFFFFF; border: 1px solid var(--border); border-radius: 4px; padding: 8px 12px; font-family: 'DM Sans', system-ui, sans-serif; font-size: 13px; font-weight: 400; color: var(--text-primary); outline: none; transition: border-color 0.15s; }
   input:focus, select:focus, textarea:focus { border-color: var(--orange); }
-  select option { background: var(--off-black); }
+  select option { background: #FFFFFF; color: var(--text-primary); }
   .btn { font-family: 'Space Mono', monospace; font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; padding: 10px 20px; border-radius: 2px; border: 0.5px solid var(--orange); background: var(--orange); color: var(--black); cursor: pointer; transition: opacity 0.15s; font-weight: 700; }
   .btn:hover { opacity: 0.85; }
   .btn:disabled { opacity: 0.4; cursor: not-allowed; }
@@ -83,8 +84,8 @@
   .save-confirm { display: none; font-family: 'Space Mono', monospace; font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--green); margin-left: 12px; }
   .q-item { padding: 1rem 1.5rem; border-bottom: 0.5px solid rgba(42,42,38,0.5); display: flex; gap: 1rem; align-items: flex-start; }
   .q-item:last-child { border-bottom: none; }
-  .q-time { font-family: 'Space Mono', monospace; font-size: 8px; color: var(--gray-mid); white-space: nowrap; padding-top: 2px; flex-shrink: 0; }
-  .q-text { font-size: 13px; font-weight: 300; color: var(--off-white); line-height: 1.5; flex: 1; }
+  .q-time { font-family: 'Space Mono', monospace; font-size: 8px; color: var(--text-secondary); white-space: nowrap; padding-top: 2px; flex-shrink: 0; }
+  .q-text { font-size: 13px; font-weight: 400; color: var(--text-primary); line-height: 1.5; flex: 1; }
   .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-bottom: 1rem; }
   .cal-day-label { font-family: 'Space Mono', monospace; font-size: 7px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--gray-mid); text-align: center; padding: 4px 0; }
   .cal-day { background: var(--off-black); border: 0.5px solid var(--border); border-radius: 4px; padding: 6px; min-height: 60px; }
@@ -146,7 +147,7 @@
   .voice-toggle { font-family: 'Space Mono', monospace; font-size: 8px; letter-spacing: 0.1em; text-transform: uppercase; padding: 4px 10px; border-radius: 2px; border: 0.5px solid var(--border); background: transparent; color: var(--gray-muted); cursor: pointer; flex-shrink: 0; }
   .voice-toggle.active { border-color: var(--green); color: var(--green); background: var(--green-dim); }
 
-  .empty-state { padding: 2rem 1.5rem; color: var(--gray-mid); font-size: 13px; font-weight: 300; font-style: italic; }
+  .empty-state { padding: 2rem 1.5rem; color: var(--text-secondary); font-size: 13px; font-weight: 400; font-style: italic; }
 
   /* SUPABASE CONFIG */
   .config-card { background: var(--orange-dim); border: 0.5px solid var(--orange); border-radius: 8px; padding: 1.25rem 1.5rem; margin-bottom: 2rem; }
@@ -1128,22 +1129,15 @@ function renderGeneratorHistory() {
   const statusColors = { generated:'tag-blue', approved:'tag-orange', posted:'tag-green' };
   tbody.innerHTML = data.carousels.map(c => {
     const dateStr = c.date_created ? new Date(c.date_created).toISOString().split('T')[0] : (c.date || '—');
-    const topicSafe = (c.topic||'').replace(/'/g,"\\'");
-    let actionBtns = '';
-    if (c.status === 'approved') {
-      actionBtns = `
-        <button class="btn btn-green" onclick="markPosted('${c.id}')" style="font-size:8px;padding:5px 10px;">Mark Posted</button>
-        <button class="btn btn-ghost" onclick="redownloadSlides('${c.id}','${topicSafe}')" style="font-size:8px;padding:5px 10px;margin-left:6px;">Re-download Slides</button>
-      `;
-    } else if (c.status === 'generated') {
-      actionBtns = `<button class="btn" onclick="approveAndDownload('${c.id}','${topicSafe}')" style="font-size:8px;padding:5px 10px;">Approve + Get Slides</button>`;
-    }
+    const markBtn = c.status === 'approved'
+      ? `<button class="btn btn-green" onclick="markPosted('${c.id}')" style="font-size:8px;padding:5px 10px;">Mark Posted</button>`
+      : '';
     return `<tr>
       <td style="font-family:'Space Mono',monospace;font-size:11px;">${dateStr}</td>
       <td>${c.topic || '—'}</td>
       <td><span class="tag-pill ${categoryColors[c.pillar?.toLowerCase().replace(/ /g,'-')]||'tag-gray'}">${c.pillar||'—'}</span></td>
       <td><span class="tag-pill ${statusColors[c.status]||'tag-gray'}">${c.status}</span></td>
-      <td>${actionBtns}</td>
+      <td>${markBtn}</td>
     </tr>`;
   }).join('');
 }
@@ -1242,66 +1236,6 @@ async function loadFromBackend() {
       document.getElementById('backend-status-text').textContent = 'The generator and Supabase tables are not connected. Make sure the app is deployed with SUPABASE_URL, SUPABASE_SERVICE_KEY, and ANTHROPIC_API_KEY environment variables.';
     }
     return false;
-  }
-}
-
-async function approveAndDownload(id, topic) {
-  const btn = event.target;
-  btn.disabled = true;
-  btn.textContent = 'Generating...';
-  try {
-    const res = await fetch('/api/generate-slides', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ carousel_id: id })
-    });
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      throw new Error(err.error || 'Failed');
-    }
-    const blob = await res.blob();
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = (topic.replace(/[^a-zA-Z0-9]/g,'_').substring(0,24)) + '_slides.zip';
-    a.click();
-    URL.revokeObjectURL(url);
-    await loadFromBackend();
-    renderGenerator();
-  } catch(err) {
-    btn.disabled = false;
-    btn.textContent = 'Approve + Get Slides';
-    alert('Slide generation failed: ' + err.message);
-  }
-}
-
-async function redownloadSlides(id, topic) {
-  const btn = event.target;
-  btn.disabled = true;
-  btn.textContent = 'Downloading...';
-  try {
-    const res = await fetch('/api/generate-slides', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ carousel_id: id })
-    });
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      throw new Error(err.error || 'Failed');
-    }
-    const blob = await res.blob();
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = (topic.replace(/[^a-zA-Z0-9]/g,'_').substring(0,24)) + '_slides.zip';
-    a.click();
-    URL.revokeObjectURL(url);
-    btn.disabled = false;
-    btn.textContent = 'Re-download Slides';
-  } catch(err) {
-    btn.disabled = false;
-    btn.textContent = 'Re-download Slides';
-    alert('Download failed: ' + err.message);
   }
 }
 
