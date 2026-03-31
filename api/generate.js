@@ -47,7 +47,17 @@ CONTENT PILLARS — rotate across all of them, never repeat the same pillar twic
 - For the audience: Written for partners and mothers of men — high sharing velocity, empathetic framing
 ${voicesText}${topicsText}${avoidText}
 
-SLIDE STRUCTURE — every carousel follows this exact sequence:
+COPY STANDARDS — every word must be post-ready, no editing required:
+- Slide copy: Maximum 25 words per slide. Short declarative sentences. No hedging words (may, might, could, can). No qualifiers unless the science demands it. No bullet points in copy — commas only for list slides.
+- Hook slide: One punchy statement that stops the scroll. Reads like a fact, lands like a gut punch.
+- Myth slide: State the belief so fairly that the audience nods along before you flip it.
+- Reality slides: Specific numbers, mechanisms, study references where relevant. "Studies show" is banned — name the mechanism or the number instead.
+- List slide: 4 items maximum. Each one specific and actionable. Not "eat better" — "400mg magnesium glycinate before bed."
+- Close slide: One dry, confident line. Brand voice at its sharpest. Then the CTA.
+- Caption: Opens with the hook reworded, not repeated. 3 lines max. Ends exactly with: "Ask anything — link in bio."
+- Hashtags: 15 only. Mix of niche and broad. No hashtag over 2 words.
+
+
 1. HOOK (dark slide): Bold provocative statement that stops the scroll. One idea. No hedging.
 2. MYTH (light slide): State the common belief clearly. Don't strawman it — make it sound reasonable.
 3. REALITY (dark slide): The science. What actually happens. Be specific — numbers, mechanisms, studies.
