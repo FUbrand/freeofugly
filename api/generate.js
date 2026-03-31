@@ -7,26 +7,53 @@ const supabase = createClient(
 
 function buildPrompt(pendingTopics, activeVoices, recentTopics) {
   const voicesText = activeVoices.length
-    ? `\nTRUSTED VOICES TO REFERENCE:\n${activeVoices.map(v => `- ${v.name}: ${v.expertise}. Key points: ${v.talking_points}`).join("\n")}`
+    ? `\nTRUSTED VOICES — reference their frameworks, cite their work, use their findings as proof points:\n${activeVoices.map(v => `- ${v.name}: ${v.expertise}. Key points: ${v.talking_points}`).join("\n")}`
     : "";
+
   const topicsText = pendingTopics.length
-    ? `\nPRIORITY TOPICS FROM TOPIC BANK (use these first if relevant):\n${pendingTopics.map(t => `- ${t.topic} [${t.pillar || "general"}]${t.notes ? " — " + t.notes : ""}`).join("\n")}`
+    ? `\nTOPIC BANK SIGNALS — these are areas the audience is interested in. Use them as directional input, not literal assignments. Your job is to find the angle within each topic that serves Free of Ugly's mission and earns saves and shares — not just reads. A topic bank entry is a starting point, not a brief.\n${pendingTopics.map(t => `- ${t.topic} [${t.pillar || "general"}]${t.notes ? " — " + t.notes : ""}`).join("\n")}`
     : "";
+
   const avoidText = recentTopics.length
-    ? `\nAVOID THESE RECENTLY COVERED TOPICS (do not repeat any of these):\n${recentTopics.join(", ")}`
+    ? `\nAVOID REPEATING THESE RECENTLY COVERED TOPICS:\n${recentTopics.join(", ")}`
     : "";
 
-  return `You are the content strategist for Free of Ugly — a science-first men's health and wellness brand. Generate exactly 3 carousel concepts for Instagram.
+  return `You are the content strategist for Free of Ugly — a science-first men's health and wellness brand on Instagram. Your job is to generate 3 carousel concepts that are genuinely worth saving and sharing.
 
-BRAND VOICE: Dry, witty, science-grounded, slightly confrontational. Never preachy. The enemy is bad information not the person who believed it. Looking good and feeling good are the same signal.
+THE BRAND MISSION:
+Free of Ugly exists to give men honest, science-backed information about their health and appearance — without shame, grift, or performance. The core belief is that looking good and feeling good are the same signal. The enemy is bad information, not the person who believed it.
 
-CONTENT PILLARS (rotate across them, avoid repeating the same pillar twice):
-- Myth busting: Hook with a lie, deliver the science, practical takeaway
-- Young men: Galloway-adjacent, cultural, emotional, broadly shareable
-- Science explainer: Mechanism-first, makes people feel informed not sold to
-- Supplements: Evidence-based, calls out grift, specific ingredients
-- For the audience: Written for partners and mothers of men, high sharing velocity
+THE TARGET AUDIENCE:
+Men 30-45 who are skeptical of wellness culture but open to real evidence. Women who want this information for the men in their lives. People who have been let down by either the "just man up" crowd or the supplement industry.
+
+BRAND VOICE:
+Dry, witty, intelligent, slightly confrontational. Never preachy. Never shaming. Short punchy sentences. Call out grift directly. Trust the audience's intelligence. The tone is: the person who read the actual study and will tell you plainly what it says.
+
+ALWAYS THINK BIGGER PICTURE:
+Every carousel should connect back to Free of Ugly's core mission. Ask yourself: does this carousel make a man feel more informed, less manipulated, and more capable of making good decisions about his health? If yes, it's on brand. If it's just a list of tips, it's not.
+
+WHAT MAKES A CAROUSEL WORTH SAVING:
+- It tells someone something they thought they knew but didn't
+- It gives them something useful they can act on today
+- It makes them feel seen, not sold to
+- It's specific enough to be credible, simple enough to be shareable
+- It has a clear point of view — not "it depends"
+
+CONTENT PILLARS — rotate across all of them, never repeat the same pillar twice in one batch:
+- Myth busting: Hook with a widely believed lie, deliver the science, land a practical takeaway
+- Young men: Galloway-adjacent — cultural, emotional, economic, broadly shareable beyond health
+- Science explainer: Mechanism-first. Makes people feel informed not sold to. Explain why something works
+- Supplements: Evidence-based, calls out grift, specific ingredients and actual dosages
+- For the audience: Written for partners and mothers of men — high sharing velocity, empathetic framing
 ${voicesText}${topicsText}${avoidText}
+
+SLIDE STRUCTURE — every carousel follows this exact sequence:
+1. HOOK (dark slide): Bold provocative statement that stops the scroll. One idea. No hedging.
+2. MYTH (light slide): State the common belief clearly. Don't strawman it — make it sound reasonable.
+3. REALITY (dark slide): The science. What actually happens. Be specific — numbers, mechanisms, studies.
+4. LIST (light slide): 3-5 practical, specific, actionable items. Not generic advice.
+5. REALITY 2 (dark slide): The bigger implication. Why this matters beyond the surface topic.
+6. CLOSE (orange slide): Brand voice sign-off. Dry, confident, one line. CTA to link in bio.
 
 For each carousel concept return EXACTLY this JSON structure:
 {
@@ -34,16 +61,16 @@ For each carousel concept return EXACTLY this JSON structure:
     {
       "topic": "Short topic name",
       "pillar": "pillar name",
-      "angle": "One sentence on the unique angle or hook",
+      "angle": "One sentence on the unique angle — what makes this carousel different from generic content on this topic",
       "slides": [
         {"tag": "tag text", "type": "hook", "content": "slide copy"},
         {"tag": "tag text", "type": "myth", "content": "slide copy"},
         {"tag": "tag text", "type": "reality", "content": "slide copy"},
-        {"tag": "tag text", "type": "list", "content": "comma-separated list items"},
+        {"tag": "tag text", "type": "list", "content": "item one, item two, item three, item four"},
         {"tag": "tag text", "type": "reality", "content": "slide copy"},
         {"tag": "Free of Ugly.", "type": "close", "content": "closing statement", "cta": "link in bio CTA text"}
       ],
-      "caption": "Full Instagram caption with hook, 2-3 lines expanding the point, and CTA ending with ask anything dash link in bio",
+      "caption": "Full Instagram caption. Open with the hook, expand the point in 2-3 lines, close with a question or CTA. End with: Ask anything — link in bio.",
       "hashtags": "15 relevant hashtags space separated"
     }
   ]
@@ -126,16 +153,16 @@ module.exports = async function handler(req, res) {
         .join("\n");
 
       const { data: inserted, error: insertError } = await supabase
-  .from("carousel_log")
-  .insert({
-    topic: carousel.topic,
-    pillar: carousel.pillar,
-    slide_copy: slideCopy,
-    slides_json: carousel.slides || [],
-    caption: carousel.caption,
-    hashtags: carousel.hashtags,
-    status: "generated",
-  })
+        .from("carousel_log")
+        .insert({
+          topic: carousel.topic,
+          pillar: carousel.pillar,
+          slide_copy: slideCopy,
+          slides_json: carousel.slides || [],
+          caption: carousel.caption,
+          hashtags: carousel.hashtags,
+          status: "generated",
+        })
         .select()
         .single();
 
