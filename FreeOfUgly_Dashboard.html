@@ -7,168 +7,227 @@
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@300;400;500&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <style>
-  :root {
-    --black: #0D0D0B; --off-black: #191917; --card: #FFFFFF;
-    --orange: #E05A2B; --orange-dim: rgba(224,90,43,0.08);
-    --cream: #F5F2EA; --off-white: #F0EDE4;
-    --gray-dark: #2A2A26; --gray-mid: #6B6B66; --gray-muted: #9A9890; --gray-light: #CCCAC0;
-    --border: #E8E5DC; --green: #3A9E6B; --green-dim: rgba(58,158,107,0.1);
-    --blue: #4A87C5; --blue-dim: rgba(74,135,197,0.1);
-    --bg: #F7F5EF; --sidebar-bg: #0D0D0B; --text-primary: #1A1A18; --text-secondary: #6B6B66;
-  }
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: 'DM Sans', system-ui, sans-serif; background: var(--bg); color: var(--text-primary); min-height: 100vh; -webkit-font-smoothing: antialiased; }
-  .layout { display: flex; min-height: 100vh; }
-  .sidebar { width: 220px; background: var(--sidebar-bg); border-right: none; display: flex; flex-direction: column; flex-shrink: 0; position: fixed; top: 0; left: 0; height: 100vh; z-index: 100; overflow-y: auto; }
-  .sidebar-logo { padding: 1.5rem; border-bottom: 0.5px solid rgba(255,255,255,0.08); }
-  .logo-mark { font-family: 'Syne', system-ui, sans-serif; font-size: 16px; font-weight: 800; text-transform: uppercase; letter-spacing: -0.02em; color: #F0EDE4; }
-  .logo-mark span { color: var(--orange); }
-  .logo-sub { font-family: 'Space Mono', monospace; font-size: 7px; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(255,255,255,0.3); margin-top: 4px; }
-  .sidebar-nav { flex: 1; padding: 1rem 0; }
-  .nav-section-label { font-family: 'Space Mono', monospace; font-size: 7px; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(255,255,255,0.25); padding: 0.75rem 1.5rem 0.25rem; }
-  .nav-item { display: flex; align-items: center; gap: 10px; padding: 0.6rem 1.5rem; font-size: 13px; font-weight: 300; color: rgba(255,255,255,0.45); cursor: pointer; transition: all 0.15s; border-left: 2px solid transparent; }
-  .nav-item:hover { color: rgba(255,255,255,0.85); background: rgba(255,255,255,0.05); }
-  .nav-item.active { color: var(--orange); border-left-color: var(--orange); background: rgba(224,90,43,0.1); }
-  .nav-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
-  .sidebar-footer { padding: 1rem 1.5rem; border-top: 0.5px solid rgba(255,255,255,0.08); font-family: 'Space Mono', monospace; font-size: 7px; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.2); }
-  .main { margin-left: 220px; flex: 1; padding: 2rem; max-width: calc(100vw - 220px); }
-  .page { display: none; }
-  .page.visible { display: block; }
-  .page-header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 2rem; padding-bottom: 1.5rem; border-bottom: 0.5px solid var(--border); flex-wrap: wrap; gap: 0.5rem; }
-  .page-title { font-family: 'Syne', system-ui, sans-serif; font-size: 24px; font-weight: 800; text-transform: uppercase; letter-spacing: -0.02em; color: var(--text-primary); }
-  .page-date { font-family: 'Space Mono', monospace; font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-secondary); }
-  .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 2rem; }
-  .stat-card { background: var(--card); border: 0.5px solid var(--border); border-radius: 8px; padding: 1.25rem; }
-  .stat-card.accent-orange { border-left: 2px solid var(--orange); }
-  .stat-card.accent-green { border-left: 2px solid var(--green); }
-  .stat-card.accent-blue { border-left: 2px solid var(--blue); }
-  .stat-label { font-family: 'Space Mono', monospace; font-size: 8px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 0.5rem; }
-  .stat-value { font-family: 'Syne', system-ui, sans-serif; font-size: 32px; font-weight: 800; color: var(--text-primary); line-height: 1; margin-bottom: 4px; }
-  .stat-change { font-family: 'Space Mono', monospace; font-size: 9px; color: var(--green); }
-  .charts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 2rem; }
-  .chart-card { background: var(--card); border: 0.5px solid var(--border); border-radius: 8px; padding: 1.5rem; }
-  .chart-card.full { grid-column: 1 / -1; }
-  .chart-header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 1.25rem; }
-  .chart-title { font-family: 'Space Mono', monospace; font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--orange); }
-  .chart-sub { font-family: 'Space Mono', monospace; font-size: 8px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--gray-mid); }
-  .chart-wrap { position: relative; height: 200px; }
-  .table-card { background: var(--card); border: 0.5px solid var(--border); border-radius: 8px; overflow: hidden; margin-bottom: 2rem; }
-  .table-header { padding: 1rem 1.5rem; border-bottom: 0.5px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
-  .table-title { font-family: 'Space Mono', monospace; font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--orange); }
-  table { width: 100%; border-collapse: collapse; }
-  thead tr { border-bottom: 0.5px solid var(--border); }
-  th { font-family: 'Space Mono', monospace; font-size: 8px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-secondary); padding: 0.75rem 1.5rem; text-align: left; font-weight: 400; }
-  td { font-size: 13px; font-weight: 400; color: var(--text-primary); padding: 0.75rem 1.5rem; border-bottom: 0.5px solid var(--border); }
-  tbody tr:last-child td { border-bottom: none; }
-  tbody tr:hover { background: rgba(224,90,43,0.03); }
-  .tag-pill { font-family: 'Space Mono', monospace; font-size: 8px; letter-spacing: 0.1em; text-transform: uppercase; padding: 3px 8px; border-radius: 2px; display: inline-block; }
-  .tag-orange { background: var(--orange-dim); color: var(--orange); }
-  .tag-green { background: var(--green-dim); color: var(--green); }
-  .tag-blue { background: var(--blue-dim); color: var(--blue); }
-  .tag-gray { background: rgba(154,152,144,0.12); color: var(--gray-muted); }
-  .form-card { background: var(--card); border: 0.5px solid var(--border); border-radius: 8px; padding: 1.5rem; margin-bottom: 2rem; }
-  .form-title { font-family: 'Space Mono', monospace; font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--orange); margin-bottom: 1.25rem; }
-  .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 1rem; }
-  .form-group { display: flex; flex-direction: column; gap: 6px; }
-  label { font-family: 'Space Mono', monospace; font-size: 8px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-secondary); }
-  input, select, textarea { background: #FFFFFF; border: 1px solid var(--border); border-radius: 4px; padding: 8px 12px; font-family: 'DM Sans', system-ui, sans-serif; font-size: 13px; font-weight: 400; color: var(--text-primary); outline: none; transition: border-color 0.15s; }
-  input:focus, select:focus, textarea:focus { border-color: var(--orange); }
-  select option { background: #FFFFFF; color: var(--text-primary); }
-  .btn { font-family: 'Space Mono', monospace; font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; padding: 10px 20px; border-radius: 2px; border: 0.5px solid var(--orange); background: var(--orange); color: var(--black); cursor: pointer; transition: opacity 0.15s; font-weight: 700; }
-  .btn:hover { opacity: 0.85; }
-  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
-  .btn-ghost { background: transparent; color: var(--orange); }
-  .btn-green { background: var(--green); border-color: var(--green); color: var(--black); }
-  .btn-gray { background: transparent; border-color: var(--gray-mid); color: var(--gray-muted); }
-  .save-confirm { display: none; font-family: 'Space Mono', monospace; font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--green); margin-left: 12px; }
-  .q-item { padding: 1rem 1.5rem; border-bottom: 0.5px solid rgba(42,42,38,0.5); display: flex; gap: 1rem; align-items: flex-start; }
-  .q-item:last-child { border-bottom: none; }
-  .q-time { font-family: 'Space Mono', monospace; font-size: 8px; color: var(--text-secondary); white-space: nowrap; padding-top: 2px; flex-shrink: 0; }
-  .q-text { font-size: 13px; font-weight: 400; color: var(--text-primary); line-height: 1.5; flex: 1; }
-  .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-bottom: 1rem; }
-  .cal-day-label { font-family: 'Space Mono', monospace; font-size: 7px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--gray-mid); text-align: center; padding: 4px 0; }
-  .cal-day { background: var(--off-black); border: 0.5px solid var(--border); border-radius: 4px; padding: 6px; min-height: 60px; }
-  .cal-day.has-post { border-color: var(--orange); background: var(--orange-dim); }
-  .cal-day.today { border-color: var(--off-white); }
-  .cal-date { font-family: 'Space Mono', monospace; font-size: 9px; color: var(--gray-mid); margin-bottom: 4px; }
-  .cal-day.today .cal-date { color: var(--off-white); font-weight: 700; }
-  .cal-post-label { font-size: 9px; color: var(--orange); line-height: 1.3; }
-  textarea.system-prompt { width: 100%; min-height: 300px; font-size: 12px; line-height: 1.6; resize: vertical; }
+:root {
+  --orange: #E05A2B; --orange-dim: rgba(224,90,43,0.08); --orange-mid: rgba(224,90,43,0.15);
+  --black: #0D0D0B; --sidebar: #191917;
+  --bg: #F4F1EB; --card: #FFFFFF; --card-alt: #F9F7F3;
+  --border: #E4E0D6; --border-dark: #D4CFC3;
+  --text: #1A1A18; --text-mid: #5A5A56; --text-muted: #9A9890;
+  --green: #3A9E6B; --green-dim: rgba(58,158,107,0.1);
+  --blue: #4A87C5; --blue-dim: rgba(74,135,197,0.1);
+  --red: #D94F3D; --red-dim: rgba(217,79,61,0.1);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; -webkit-font-smoothing: antialiased; }
+.layout { display: flex; min-height: 100vh; }
 
-  /* WEEKLY GENERATOR STYLES */
-  .gen-status-bar { background: var(--card); border: 0.5px solid var(--border); border-radius: 8px; padding: 1.25rem 1.5rem; margin-bottom: 2rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
-  .gen-status-info { display: flex; flex-direction: column; gap: 4px; }
-  .gen-status-label { font-family: 'Space Mono', monospace; font-size: 8px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gray-mid); }
-  .gen-status-value { font-size: 13px; font-weight: 300; color: var(--off-white); }
-  .gen-big-btn { font-family: 'Syne', system-ui, sans-serif; font-size: 14px; font-weight: 800; text-transform: uppercase; letter-spacing: -0.01em; padding: 14px 32px; border-radius: 2px; border: none; background: var(--orange); color: var(--black); cursor: pointer; transition: opacity 0.15s; }
-  .gen-big-btn:hover { opacity: 0.85; }
-  .gen-big-btn:disabled { opacity: 0.4; cursor: not-allowed; }
-  .loading-bar { display: none; align-items: center; gap: 12px; padding: 1rem 1.5rem; background: var(--orange-dim); border: 0.5px solid var(--orange); border-radius: 8px; margin-bottom: 2rem; }
-  .loading-bar.visible { display: flex; }
-  .loading-dots { display: flex; gap: 4px; }
-  .loading-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--orange); animation: blink 1.2s infinite; }
-  .loading-dot:nth-child(2) { animation-delay: 0.2s; }
-  .loading-dot:nth-child(3) { animation-delay: 0.4s; }
-  @keyframes blink { 0%,80%,100%{opacity:0.2} 40%{opacity:1} }
-  .loading-text { font-family: 'Space Mono', monospace; font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--orange); }
-  .carousel-concept { background: var(--card); border: 0.5px solid var(--border); border-radius: 8px; margin-bottom: 1.5rem; overflow: hidden; }
-  .concept-header { padding: 1rem 1.5rem; border-bottom: 0.5px solid var(--border); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.75rem; }
-  .concept-num { font-family: 'Space Mono', monospace; font-size: 8px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gray-mid); }
-  .concept-topic { font-family: 'Syne', system-ui, sans-serif; font-size: 16px; font-weight: 800; text-transform: uppercase; letter-spacing: -0.01em; color: var(--off-white); }
-  .concept-pillar { }
-  .concept-actions { display: flex; gap: 8px; }
-  .concept-body { padding: 1.5rem; }
-  .concept-section-label { font-family: 'Space Mono', monospace; font-size: 8px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--orange); margin-bottom: 0.75rem; margin-top: 1.25rem; }
-  .concept-section-label:first-child { margin-top: 0; }
-  .slides-preview { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 8px; }
-  .slide-preview-item { background: var(--off-black); border: 0.5px solid var(--border); border-radius: 4px; padding: 0.75rem; }
-  .slide-preview-tag { font-family: 'Space Mono', monospace; font-size: 7px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--orange); margin-bottom: 4px; }
-  .slide-preview-text { font-size: 11px; font-weight: 300; color: var(--gray-muted); line-height: 1.4; }
-  .concept-caption { font-size: 13px; font-weight: 300; color: var(--off-white); line-height: 1.6; background: var(--off-black); border: 0.5px solid var(--border); border-radius: 4px; padding: 1rem; }
-  .concept-hashtags { font-family: 'Space Mono', monospace; font-size: 10px; color: var(--blue); line-height: 1.8; }
-  .approved-badge { font-family: 'Space Mono', monospace; font-size: 8px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--green); background: var(--green-dim); padding: 4px 10px; border-radius: 2px; }
-  .download-section { padding: 1.5rem; border-top: 0.5px solid var(--border); display: flex; align-items: center; gap: 12px; background: rgba(76,175,125,0.05); }
+/* SIDEBAR */
+.sidebar { width: 220px; background: var(--sidebar); display: flex; flex-direction: column; position: fixed; top: 0; left: 0; height: 100vh; z-index: 100; overflow-y: auto; }
+.sidebar-logo { padding: 1.5rem; border-bottom: 1px solid rgba(255,255,255,0.06); }
+.logo-mark { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 800; text-transform: uppercase; letter-spacing: -0.02em; color: #F0EDE4; }
+.logo-mark span { color: var(--orange); }
+.logo-sub { font-family: 'Space Mono', monospace; font-size: 7px; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(255,255,255,0.2); margin-top: 4px; }
+.sidebar-nav { flex: 1; padding: 1rem 0; }
+.nav-label { font-family: 'Space Mono', monospace; font-size: 7px; letter-spacing: 0.16em; text-transform: uppercase; color: rgba(255,255,255,0.2); padding: 0.75rem 1.5rem 0.25rem; }
+.nav-item { display: flex; align-items: center; gap: 10px; padding: 0.55rem 1.5rem; font-size: 13px; font-weight: 400; color: rgba(255,255,255,0.4); cursor: pointer; transition: all 0.15s; border-left: 2px solid transparent; }
+.nav-item:hover { color: rgba(255,255,255,0.8); background: rgba(255,255,255,0.04); }
+.nav-item.active { color: var(--orange); border-left-color: var(--orange); background: rgba(224,90,43,0.08); }
+.nav-dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; flex-shrink: 0; }
+.sidebar-footer { padding: 1rem 1.5rem; border-top: 1px solid rgba(255,255,255,0.06); font-family: 'Space Mono', monospace; font-size: 7px; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.15); }
 
-  /* TOPIC BANK */
-  .topic-item { padding: 1rem 1.5rem; border-bottom: 0.5px solid rgba(42,42,38,0.5); display: flex; align-items: center; gap: 1rem; }
-  .topic-item:last-child { border-bottom: none; }
-  .topic-text { flex: 1; font-size: 13px; font-weight: 300; color: var(--off-white); }
-  .topic-notes { font-size: 11px; color: var(--gray-muted); }
-  .topic-priority { font-family: 'Space Mono', monospace; font-size: 8px; color: var(--orange); }
+/* MAIN */
+.main { margin-left: 220px; flex: 1; padding: 2rem; max-width: calc(100vw - 220px); }
+.page { display: none; }
+.page.visible { display: block; }
+.page-header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 2rem; padding-bottom: 1.25rem; border-bottom: 1px solid var(--border); flex-wrap: wrap; gap: 0.5rem; }
+.page-title { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; text-transform: uppercase; letter-spacing: -0.02em; color: var(--text); }
+.page-sub { font-family: 'Space Mono', monospace; font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); }
 
-  /* TRUSTED VOICES */
-  .voice-item { padding: 1rem 1.5rem; border-bottom: 0.5px solid rgba(42,42,38,0.5); display: flex; align-items: flex-start; gap: 1rem; }
-  .voice-item:last-child { border-bottom: none; }
-  .voice-info { flex: 1; }
-  .voice-name { font-size: 14px; font-weight: 500; color: var(--off-white); margin-bottom: 2px; }
-  .voice-expertise { font-size: 11px; color: var(--orange); margin-bottom: 4px; }
-  .voice-points { font-size: 11px; font-weight: 300; color: var(--gray-muted); line-height: 1.5; }
-  .voice-toggle { font-family: 'Space Mono', monospace; font-size: 8px; letter-spacing: 0.1em; text-transform: uppercase; padding: 4px 10px; border-radius: 2px; border: 0.5px solid var(--border); background: transparent; color: var(--gray-muted); cursor: pointer; flex-shrink: 0; }
-  .voice-toggle.active { border-color: var(--green); color: var(--green); background: var(--green-dim); }
+/* CARDS */
+.card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; margin-bottom: 1.5rem; }
+.card-header { padding: 1rem 1.25rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+.card-title { font-family: 'Space Mono', monospace; font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--orange); font-weight: 700; }
+.card-body { padding: 1.25rem; }
 
-  .empty-state { padding: 2rem 1.5rem; color: var(--text-secondary); font-size: 13px; font-weight: 400; font-style: italic; }
+/* STATS GRID */
+.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 1.5rem; }
+.stat-card { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1.25rem; }
+.stat-card.orange { border-top: 3px solid var(--orange); }
+.stat-card.green { border-top: 3px solid var(--green); }
+.stat-card.blue { border-top: 3px solid var(--blue); }
+.stat-label { font-family: 'Space Mono', monospace; font-size: 8px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 0.5rem; }
+.stat-value { font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 800; color: var(--text); line-height: 1; margin-bottom: 4px; }
+.stat-note { font-size: 11px; color: var(--text-muted); }
 
-  /* SUPABASE CONFIG */
-  .config-card { background: var(--orange-dim); border: 0.5px solid var(--orange); border-radius: 8px; padding: 1.25rem 1.5rem; margin-bottom: 2rem; }
-  .config-title { font-family: 'Space Mono', monospace; font-size: 8px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--orange); margin-bottom: 0.5rem; }
-  .config-text { font-size: 12px; font-weight: 300; color: var(--off-white); line-height: 1.6; }
+/* FORMS */
+.form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 1rem; }
+.form-group { display: flex; flex-direction: column; gap: 5px; }
+.form-group.full { grid-column: 1 / -1; }
+label { font-family: 'Space Mono', monospace; font-size: 8px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-mid); }
+input, select, textarea { background: var(--bg); border: 1px solid var(--border-dark); border-radius: 6px; padding: 8px 11px; font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 400; color: var(--text); outline: none; transition: border-color 0.15s; width: 100%; }
+input:focus, select:focus, textarea:focus { border-color: var(--orange); background: #fff; }
+textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
 
-  .metricool-card { background: var(--card); border: 0.5px solid var(--border); border-radius: 8px; padding: 2rem; text-align: center; margin-bottom: 2rem; }
-  .metricool-icon { font-family: 'Syne', system-ui, sans-serif; font-size: 40px; font-weight: 800; color: var(--orange); margin-bottom: 1rem; }
-  .metricool-title { font-family: 'Space Mono', monospace; font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--gray-muted); margin-bottom: 0.5rem; }
-  .metricool-desc { font-size: 13px; font-weight: 300; color: var(--gray-muted); line-height: 1.6; max-width: 400px; margin: 0 auto 1.5rem; }
+/* BUTTONS */
+.btn { font-family: 'Space Mono', monospace; font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; padding: 9px 18px; border-radius: 5px; border: none; background: var(--orange); color: #fff; cursor: pointer; font-weight: 700; transition: opacity 0.15s; display: inline-flex; align-items: center; gap: 6px; }
+.btn:hover { opacity: 0.85; }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.btn-ghost { background: transparent; color: var(--orange); border: 1px solid var(--orange); }
+.btn-green { background: var(--green); color: #fff; }
+.btn-gray { background: transparent; color: var(--text-mid); border: 1px solid var(--border-dark); }
+.btn-sm { font-size: 8px; padding: 6px 12px; }
+.btn-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 1rem; align-items: center; }
+.confirm { font-family: 'Space Mono', monospace; font-size: 9px; color: var(--green); display: none; }
 
-  /* MOBILE BOTTOM NAV */
-  .mobile-nav { display: none; position: fixed; bottom: 0; left: 0; right: 0; background: var(--off-black); border-top: 0.5px solid var(--border); z-index: 200; padding: 0; }
-  .mobile-nav-inner { display: flex; overflow-x: auto; scrollbar-width: none; }
-  .mobile-nav-inner::-webkit-scrollbar { display: none; }
-  .mobile-nav-btn { flex-shrink: 0; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 10px 14px; cursor: pointer; border: none; background: transparent; color: var(--gray-muted); transition: color 0.15s; min-width: 60px; }
-  .mobile-nav-btn.active { color: var(--orange); }
-  .mobile-nav-icon { font-size: 18px; line-height: 1; }
-  .mobile-nav-label { font-family: 'Space Mono', monospace; font-size: 7px; letter-spacing: 0.08em; text-transform: uppercase; white-space: nowrap; }
+/* TABLES */
+table { width: 100%; border-collapse: collapse; }
+th { font-family: 'Space Mono', monospace; font-size: 8px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); padding: 0.65rem 1rem; text-align: left; font-weight: 400; background: var(--card-alt); border-bottom: 1px solid var(--border); }
+td { font-size: 13px; color: var(--text); padding: 0.65rem 1rem; border-bottom: 1px solid var(--border); vertical-align: middle; }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: rgba(224,90,43,0.02); }
 
-  /* MOBILE HEADER */
-  .mobile-header { display: none; position: fixed; top: 0; left: 0; right: 0; background: var(--off-black); border-bottom: 0.5px solid var(--border); z-index:
+/* TAGS */
+.tag { font-family: 'Space Mono', monospace; font-size: 8px; letter-spacing: 0.08em; text-transform: uppercase; padding: 3px 8px; border-radius: 3px; display: inline-block; }
+.tag-orange { background: var(--orange-dim); color: var(--orange); }
+.tag-green { background: var(--green-dim); color: var(--green); }
+.tag-blue { background: var(--blue-dim); color: var(--blue); }
+.tag-gray { background: rgba(154,152,144,0.12); color: var(--text-muted); }
+.tag-red { background: var(--red-dim); color: var(--red); }
+
+/* EMPTY STATE */
+.empty { padding: 2.5rem 1.25rem; text-align: center; color: var(--text-muted); font-size: 13px; font-style: italic; }
+
+/* GENERATOR */
+.gen-bar { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 1.25rem 1.5rem; margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+.gen-stats { display: flex; gap: 2rem; flex-wrap: wrap; }
+.gen-stat-label { font-family: 'Space Mono', monospace; font-size: 8px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 3px; }
+.gen-stat-val { font-size: 14px; font-weight: 500; color: var(--text); }
+.gen-btn { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: -0.01em; padding: 12px 28px; border-radius: 6px; border: none; background: var(--orange); color: #fff; cursor: pointer; transition: opacity 0.15s; white-space: nowrap; }
+.gen-btn:hover { opacity: 0.85; }
+.gen-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.loading { display: none; align-items: center; gap: 12px; padding: 1rem 1.25rem; background: var(--orange-dim); border: 1px solid var(--orange); border-radius: 8px; margin-bottom: 1.5rem; }
+.loading.on { display: flex; }
+.dots { display: flex; gap: 4px; }
+.dot { width: 6px; height: 6px; border-radius: 50%; background: var(--orange); animation: blink 1.2s infinite; }
+.dot:nth-child(2) { animation-delay: 0.2s; }
+.dot:nth-child(3) { animation-delay: 0.4s; }
+@keyframes blink { 0%,80%,100%{opacity:0.2} 40%{opacity:1} }
+.loading-text { font-family: 'Space Mono', monospace; font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--orange); }
+
+/* CONCEPT CARDS */
+.concept { background: var(--card); border: 1px solid var(--border); border-radius: 10px; margin-bottom: 1.5rem; overflow: hidden; }
+.concept-head { padding: 1rem 1.25rem; border-bottom: 1px solid var(--border); display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+.concept-num { font-family: 'Space Mono', monospace; font-size: 8px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 4px; }
+.concept-title { font-family: 'Syne', sans-serif; font-size: 17px; font-weight: 800; text-transform: uppercase; letter-spacing: -0.01em; color: var(--text); }
+.concept-angle { font-size: 12px; color: var(--text-mid); margin-top: 4px; line-height: 1.4; }
+.concept-body { padding: 1.25rem; }
+.section-label { font-family: 'Space Mono', monospace; font-size: 8px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--orange); margin-bottom: 0.75rem; margin-top: 1.25rem; }
+.section-label:first-child { margin-top: 0; }
+
+/* SLIDE PREVIEWS */
+.slides-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; margin-bottom: 0.5rem; }
+@media (max-width: 1100px) { .slides-grid { grid-template-columns: repeat(3, 1fr); } }
+.slide-prev { border-radius: 6px; padding: 10px; min-height: 100px; display: flex; flex-direction: column; gap: 5px; }
+.slide-prev.hook { background: #0D0D0B; }
+.slide-prev.myth { background: #F5F2EA; border: 1px solid #DDD; }
+.slide-prev.reality { background: #0D0D0B; }
+.slide-prev.list { background: #F5F2EA; border: 1px solid #DDD; }
+.slide-prev.close { background: #E05A2B; }
+.slide-tag { font-family: 'Space Mono', monospace; font-size: 7px; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 3px; }
+.hook .slide-tag, .reality .slide-tag { color: #E05A2B; }
+.myth .slide-tag, .list .slide-tag { color: #9A9890; }
+.close .slide-tag { color: rgba(0,0,0,0.4); }
+.slide-copy { font-size: 10px; line-height: 1.4; flex: 1; }
+.hook .slide-copy, .reality .slide-copy { color: #F0EDE4; }
+.myth .slide-copy, .list .slide-copy { color: #2A2A26; }
+.close .slide-copy { color: #0D0D0B; }
+.slide-type { font-family: 'Space Mono', monospace; font-size: 7px; text-transform: uppercase; margin-top: auto; padding-top: 5px; opacity: 0.4; }
+.hook .slide-type, .reality .slide-type { color: #fff; }
+.myth .slide-type, .list .slide-type { color: #000; }
+.close .slide-type { color: #000; }
+
+/* COPY BLOCK */
+.copy-block { background: var(--card-alt); border: 1px solid var(--border); border-radius: 6px; padding: 1rem; font-size: 13px; line-height: 1.65; color: var(--text); white-space: pre-wrap; word-break: break-word; }
+.copy-block.mono { font-family: 'Space Mono', monospace; font-size: 10px; color: var(--blue); }
+
+/* STORY CARDS */
+.stories-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+@media (max-width: 900px) { .stories-grid { grid-template-columns: 1fr; } }
+.story-card { border-radius: 8px; padding: 1rem; }
+.story-card.poll { background: #0D0D0B; }
+.story-card.statement { background: #E05A2B; }
+.story-card.question { background: #F5F2EA; border: 1px solid #DDD; }
+.story-type { font-family: 'Space Mono', monospace; font-size: 7px; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 8px; }
+.poll .story-type { color: #E05A2B; }
+.statement .story-type { color: rgba(0,0,0,0.5); }
+.question .story-type { color: #9A9890; }
+.story-content { font-size: 12px; line-height: 1.5; font-weight: 500; }
+.poll .story-content, .statement .story-content { color: #F0EDE4; }
+.question .story-content { color: #1A1A18; }
+.story-options { margin-top: 8px; display: flex; gap: 6px; flex-wrap: wrap; }
+.story-option { background: rgba(255,255,255,0.12); border-radius: 4px; padding: 3px 8px; font-size: 10px; color: #F0EDE4; font-family: 'Space Mono', monospace; font-size: 8px; letter-spacing: 0.06em; }
+
+/* CLAUDE PROMPT BOX */
+.claude-box { background: #0D0D0B; border-radius: 8px; padding: 1.25rem; margin-top: 1rem; }
+.claude-box-label { font-family: 'Space Mono', monospace; font-size: 8px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--orange); margin-bottom: 0.75rem; }
+.claude-prompt { font-size: 12px; color: #C8C5BC; line-height: 1.6; white-space: pre-wrap; word-break: break-word; font-family: 'DM Sans', sans-serif; }
+
+/* POST QUEUE */
+.queue-item { padding: 1rem 1.25rem; border-bottom: 1px solid var(--border); }
+.queue-item:last-child { border-bottom: none; }
+.queue-item-head { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; margin-bottom: 0.5rem; }
+.queue-topic { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 800; text-transform: uppercase; color: var(--text); }
+.queue-meta { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+.queue-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+
+/* POST LOG */
+.post-item { padding: 1rem 1.25rem; border-bottom: 1px solid var(--border); }
+.post-item:last-child { border-bottom: none; }
+.post-item-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; margin-bottom: 0.75rem; flex-wrap: wrap; }
+.post-topic { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 800; text-transform: uppercase; color: var(--text); }
+.post-date { font-family: 'Space Mono', monospace; font-size: 9px; color: var(--text-muted); margin-top: 3px; }
+.stats-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 8px; }
+.stat-input-group { display: flex; flex-direction: column; gap: 3px; }
+.stat-input-label { font-family: 'Space Mono', monospace; font-size: 7px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); }
+.stat-input { background: var(--bg); border: 1px solid var(--border); border-radius: 4px; padding: 5px 8px; font-size: 13px; font-weight: 500; color: var(--text); width: 100%; text-align: center; }
+.stat-input:focus { border-color: var(--orange); background: #fff; outline: none; }
+
+/* TOPIC & VOICE ITEMS */
+.list-item { padding: 0.9rem 1.25rem; border-bottom: 1px solid var(--border); display: flex; align-items: flex-start; gap: 1rem; }
+.list-item:last-child { border-bottom: none; }
+.list-item-body { flex: 1; }
+.list-item-title { font-size: 14px; font-weight: 500; color: var(--text); margin-bottom: 3px; }
+.list-item-sub { font-size: 12px; color: var(--text-mid); line-height: 1.4; }
+.list-item-note { font-size: 11px; color: var(--text-muted); margin-top: 3px; line-height: 1.4; }
+.item-actions { display: flex; gap: 6px; flex-shrink: 0; }
+.priority-badge { font-family: 'Space Mono', monospace; font-size: 7px; letter-spacing: 0.08em; text-transform: uppercase; padding: 2px 6px; border-radius: 3px; }
+.priority-high { background: var(--orange-mid); color: var(--orange); }
+.priority-normal { background: rgba(154,152,144,0.12); color: var(--text-muted); }
+.priority-low { background: rgba(154,152,144,0.08); color: var(--text-muted); }
+
+/* CALENDAR */
+.cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; margin-bottom: 1rem; }
+.cal-label { font-family: 'Space Mono', monospace; font-size: 7px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-muted); text-align: center; padding: 4px 0; }
+.cal-day { background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 6px; min-height: 64px; }
+.cal-day.has-post { border-color: var(--orange); background: var(--orange-dim); }
+.cal-day.has-story { border-color: var(--blue); }
+.cal-day.today { outline: 2px solid var(--text); }
+.cal-date { font-family: 'Space Mono', monospace; font-size: 9px; color: var(--text-muted); margin-bottom: 3px; }
+.cal-day.today .cal-date { color: var(--text); font-weight: 700; }
+.cal-entry { font-size: 9px; color: var(--orange); line-height: 1.3; margin-top: 2px; }
+
+/* QUESTION LOG */
+.q-item { padding: 0.75rem 1.25rem; border-bottom: 1px solid var(--border); display: flex; gap: 1rem; align-items: flex-start; }
+.q-item:last-child { border-bottom: none; }
+.q-time { font-family: 'Space Mono', monospace; font-size: 8px; color: var(--text-muted); white-space: nowrap; padding-top: 2px; flex-shrink: 0; }
+.q-text { font-size: 13px; color: var(--text); line-height: 1.5; flex: 1; }
+
+/* MODAL */
+.modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 500; align-items: center; justify-content: center; padding: 1rem; }
+.modal.open { display: flex; }
+.modal-box { background: var(--card); border-radius: 12px; padding: 1.5rem; max-width: 480px; width: 100%; }
+.modal-title { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 800; text-transform: uppercase; margin-bottom: 1.25rem; }
+.modal-actions { display: flex; gap: 8px; margin-top: 1.25rem; }
 </style>
 </head>
 <body>
@@ -177,27 +236,27 @@
 <aside class="sidebar">
   <div class="sidebar-logo">
     <div class="logo-mark">Free of Ugly<span>.</span></div>
-    <div class="logo-sub">Command Center v2</div>
+    <div class="logo-sub">Command Center v3</div>
   </div>
   <nav class="sidebar-nav">
-    <div class="nav-section-label">Overview</div>
+    <div class="nav-label">Overview</div>
     <div class="nav-item active" onclick="showPage('overview',this)"><div class="nav-dot"></div>Dashboard</div>
 
-    <div class="nav-section-label">Instagram</div>
-    <div class="nav-item" onclick="showPage('instagram',this)"><div class="nav-dot"></div>Stats & Growth</div>
-    <div class="nav-item" onclick="showPage('posts',this)"><div class="nav-dot"></div>Post Log</div>
-    <div class="nav-item" onclick="showPage('calendar',this)"><div class="nav-dot"></div>Content Calendar</div>
-
-    <div class="nav-section-label">Content</div>
+    <div class="nav-label">Content</div>
     <div class="nav-item" onclick="showPage('generator',this)"><div class="nav-dot"></div>Weekly Generator</div>
+    <div class="nav-item" onclick="showPage('queue',this)"><div class="nav-dot"></div>Post Queue <span id="queue-badge" style="margin-left:auto;background:var(--orange);color:#fff;font-family:'Space Mono',monospace;font-size:7px;padding:2px 6px;border-radius:3px;display:none;"></span></div>
     <div class="nav-item" onclick="showPage('topicbank',this)"><div class="nav-dot"></div>Topic Bank</div>
     <div class="nav-item" onclick="showPage('voices',this)"><div class="nav-dot"></div>Trusted Voices</div>
 
-    <div class="nav-section-label">Website</div>
+    <div class="nav-label">Posted</div>
+    <div class="nav-item" onclick="showPage('calendar',this)"><div class="nav-dot"></div>Calendar</div>
+    <div class="nav-item" onclick="showPage('performance',this)"><div class="nav-dot"></div>Performance</div>
+
+    <div class="nav-label">Website</div>
     <div class="nav-item" onclick="showPage('questions',this)"><div class="nav-dot"></div>Question Log</div>
-    <div class="nav-item" onclick="showPage('prompt',this)"><div class="nav-dot"></div>Brand Voice Editor</div>
+    <div class="nav-item" onclick="showPage('prompt',this)"><div class="nav-dot"></div>Brand Voice</div>
   </nav>
-  <div class="sidebar-footer">freeofugly.co — v2.0</div>
+  <div class="sidebar-footer">freeofugly.co — v3.0</div>
 </aside>
 
 <main class="main">
@@ -206,327 +265,199 @@
 <div class="page visible" id="page-overview">
   <div class="page-header">
     <div class="page-title">Dashboard</div>
-    <div class="page-date" id="today-date"></div>
+    <div class="page-sub" id="today-date"></div>
   </div>
   <div class="stats-grid">
-    <div class="stat-card accent-orange"><div class="stat-label">Followers</div><div class="stat-value" id="stat-followers">—</div><div class="stat-change">Current count</div></div>
-    <div class="stat-card accent-green"><div class="stat-label">Posts Published</div><div class="stat-value" id="stat-posts">0</div><div class="stat-change">Since launch</div></div>
-    <div class="stat-card accent-blue"><div class="stat-label">Questions Asked</div><div class="stat-value" id="stat-questions">0</div><div class="stat-change">Via Ask Anything</div></div>
-    <div class="stat-card accent-orange"><div class="stat-label">Avg Engagement</div><div class="stat-value" id="stat-engagement">—%</div><div class="stat-change">Likes + saves / followers</div></div>
-    <div class="stat-card accent-green"><div class="stat-label">Total Saves</div><div class="stat-value" id="stat-saves">0</div><div class="stat-change">Highest value metric</div></div>
-    <div class="stat-card accent-blue"><div class="stat-label">Topics in Bank</div><div class="stat-value" id="stat-topics">0</div><div class="stat-change">Pending content ideas</div></div>
+    <div class="stat-card orange"><div class="stat-label">Carousels Posted</div><div class="stat-value" id="ov-posts">0</div><div class="stat-note">Since launch</div></div>
+    <div class="stat-card green"><div class="stat-label">Total Saves</div><div class="stat-value" id="ov-saves">0</div><div class="stat-note">Highest value metric</div></div>
+    <div class="stat-card blue"><div class="stat-label">Avg Engagement</div><div class="stat-value" id="ov-eng">—%</div><div class="stat-note">Likes + saves / followers</div></div>
+    <div class="stat-card orange"><div class="stat-label">In Queue</div><div class="stat-value" id="ov-queue">0</div><div class="stat-note">Ready to post</div></div>
+    <div class="stat-card green"><div class="stat-label">Topics Banked</div><div class="stat-value" id="ov-topics">0</div><div class="stat-note">Pending ideas</div></div>
+    <div class="stat-card blue"><div class="stat-label">Questions Asked</div><div class="stat-value" id="ov-questions">0</div><div class="stat-note">Via Ask Anything</div></div>
   </div>
-  <div class="charts-grid">
-    <div class="chart-card full"><div class="chart-header"><div class="chart-title">Follower growth</div><div class="chart-sub">Weekly</div></div><div class="chart-wrap"><canvas id="chart-followers"></canvas></div></div>
-    <div class="chart-card"><div class="chart-header"><div class="chart-title">Saves per post</div><div class="chart-sub">Last 10</div></div><div class="chart-wrap"><canvas id="chart-saves"></canvas></div></div>
-    <div class="chart-card"><div class="chart-header"><div class="chart-title">Question categories</div><div class="chart-sub">All time</div></div><div class="chart-wrap"><canvas id="chart-categories"></canvas></div></div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:1.5rem;">
+    <div class="card">
+      <div class="card-header"><div class="card-title">Saves per post</div><div style="font-size:11px;color:var(--text-muted);">Last 10</div></div>
+      <div style="padding:1rem;height:180px;"><canvas id="chart-saves"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="card-header"><div class="card-title">Posts by pillar</div><div style="font-size:11px;color:var(--text-muted);">All time</div></div>
+      <div style="padding:1rem;height:180px;"><canvas id="chart-pillars"></canvas></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-header"><div class="card-title">Best performing posts</div></div>
+    <table>
+      <thead><tr><th>Topic</th><th>Date</th><th>Saves</th><th>Likes</th><th>Reach</th><th>Engagement</th></tr></thead>
+      <tbody id="top-posts-body"><tr><td colspan="6" class="empty">No posts logged yet</td></tr></tbody>
+    </table>
   </div>
 </div>
 
-<!-- INSTAGRAM STATS -->
-<div class="page" id="page-instagram">
-  <div class="page-header"><div class="page-title">Instagram Stats</div><div class="page-date">Manual + Metricool</div></div>
-  <div class="metricool-card">
-    <div class="metricool-icon">↗</div>
-    <div class="metricool-title">Connect Metricool for live stats</div>
-    <div class="metricool-desc">Metricool connects to your Instagram business account in 2 clicks and pulls all stats automatically.</div>
-    <a href="https://metricool.com" target="_blank"><button class="btn">Set up Metricool — free plan available</button></a>
-  </div>
-  <div class="form-card">
-    <div class="form-title">Weekly follower tracker</div>
-    <div class="form-grid">
-      <div class="form-group"><label>Week ending</label><input type="date" id="ig-date"></div>
-      <div class="form-group"><label>Follower count</label><input type="number" id="ig-followers" placeholder="e.g. 1240"></div>
-      <div class="form-group"><label>Reach this week</label><input type="number" id="ig-reach" placeholder="e.g. 4500"></div>
-      <div class="form-group"><label>Profile visits</label><input type="number" id="ig-visits" placeholder="e.g. 320"></div>
-    </div>
-    <button class="btn" onclick="saveIGWeek()">Save week</button>
-    <span class="save-confirm" id="ig-confirm">Saved.</span>
-  </div>
-  <div class="table-card">
-    <div class="table-header"><div class="table-title">Weekly growth log</div></div>
-    <table><thead><tr><th>Week</th><th>Followers</th><th>Growth</th><th>Reach</th><th>Visits</th></tr></thead>
-    <tbody id="ig-table-body"><tr><td colspan="5" class="empty-state">No data yet</td></tr></tbody></table>
-  </div>
-</div>
-
-<!-- POST LOG -->
-<div class="page" id="page-posts">
-  <div class="page-header"><div class="page-title">Post Log</div><div class="page-date">All carousels</div></div>
-  <div class="form-card">
-    <div class="form-title">Log a new post</div>
-    <div class="form-grid">
-      <div class="form-group"><label>Date posted</label><input type="date" id="post-date"></div>
-      <div class="form-group"><label>Carousel topic</label><input type="text" id="post-topic" placeholder="e.g. Sleep and skin"></div>
-      <div class="form-group"><label>Category</label>
-        <select id="post-category">
-          <option value="myth-bust">Myth busting</option>
-          <option value="young-men">Young men</option>
-          <option value="science">Science explainer</option>
-          <option value="supplements">Supplements</option>
-          <option value="audience">For the audience</option>
-          <option value="other">Other</option>
-        </select>
-      </div>
-      <div class="form-group"><label>Likes</label><input type="number" id="post-likes" placeholder="0"></div>
-      <div class="form-group"><label>Saves</label><input type="number" id="post-saves" placeholder="0"></div>
-      <div class="form-group"><label>Comments</label><input type="number" id="post-comments" placeholder="0"></div>
-      <div class="form-group"><label>Shares</label><input type="number" id="post-shares" placeholder="0"></div>
-      <div class="form-group"><label>New followers</label><input type="number" id="post-follows" placeholder="0"></div>
-    </div>
-    <button class="btn" onclick="savePost()">Log post</button>
-    <span class="save-confirm" id="post-confirm">Saved.</span>
-  </div>
-  <div class="table-card">
-    <div class="table-header"><div class="table-title">All posts</div></div>
-    <table><thead><tr><th>Date</th><th>Topic</th><th>Category</th><th>Likes</th><th>Saves</th><th>Comments</th><th>Engagement</th><th>Actions</th></tr></thead>
-    <tbody id="post-table-body"><tr><td colspan="8" class="empty-state">No posts logged yet</td></tr></tbody></table>
-  </div>
-</div>
-
-<!-- EDIT POST MODAL -->
-<div id="edit-modal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);z-index:500;align-items:center;justify-content:center;padding:1rem;">
-  <div style="background:var(--card);border:0.5px solid var(--border);border-radius:8px;padding:1.5rem;width:100%;max-width:560px;">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem;">
-      <div style="font-family:'Space Mono',monospace;font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--orange);">Edit post stats</div>
-      <button onclick="closeEditModal()" style="background:none;border:none;color:var(--gray-muted);font-size:18px;cursor:pointer;">✕</button>
-    </div>
-    <input type="hidden" id="edit-post-id">
-    <div class="form-grid">
-      <div class="form-group"><label>Date</label><input type="date" id="edit-post-date"></div>
-      <div class="form-group"><label>Topic</label><input type="text" id="edit-post-topic"></div>
-      <div class="form-group"><label>Likes</label><input type="number" id="edit-post-likes"></div>
-      <div class="form-group"><label>Saves</label><input type="number" id="edit-post-saves"></div>
-      <div class="form-group"><label>Comments</label><input type="number" id="edit-post-comments"></div>
-      <div class="form-group"><label>Shares</label><input type="number" id="edit-post-shares"></div>
-      <div class="form-group"><label>New followers</label><input type="number" id="edit-post-follows"></div>
-    </div>
-    <div style="display:flex;gap:10px;margin-top:1rem;">
-      <button class="btn" onclick="saveEditPost()">Save changes</button>
-      <button class="btn btn-ghost" onclick="closeEditModal()">Cancel</button>
-    </div>
-  </div>
-</div>
-
-<!-- CALENDAR -->
-<div class="page" id="page-calendar">
-  <div class="page-header"><div class="page-title">Content Calendar</div><div class="page-date" id="cal-month-label"></div></div>
-  <div class="form-card">
-    <div class="form-title">Schedule a post</div>
-    <div class="form-grid">
-      <div class="form-group"><label>Date</label><input type="date" id="cal-date"></div>
-      <div class="form-group"><label>Topic</label><input type="text" id="cal-topic" placeholder="e.g. Peptides — real or hype?"></div>
-      <div class="form-group"><label>Status</label>
-        <select id="cal-status">
-          <option value="planned">Planned</option>
-          <option value="drafted">Drafted</option>
-          <option value="ready">Ready to post</option>
-          <option value="posted">Posted</option>
-        </select>
-      </div>
-    </div>
-    <button class="btn" onclick="saveCalEntry()">Add to calendar</button>
-    <span class="save-confirm" id="cal-confirm">Added.</span>
-  </div>
-  <div class="chart-card">
-    <div class="chart-header">
-      <div class="chart-title" id="cal-title-label">This month</div>
-      <div style="display:flex;gap:12px;">
-        <span style="font-family:'Space Mono',monospace;font-size:8px;color:var(--orange);">■ Planned</span>
-        <span style="font-family:'Space Mono',monospace;font-size:8px;color:var(--green);">■ Posted</span>
-      </div>
-    </div>
-    <div class="cal-grid" id="cal-days-labels"></div>
-    <div class="cal-grid" id="cal-grid"></div>
-  </div>
-
-  <div class="table-card">
-    <div class="table-header"><div class="table-title">All scheduled entries — edit or move dates</div></div>
-    <div id="cal-entry-list"><div class="empty-state">No entries yet</div></div>
-  </div>
-</div>
-
-<!-- CALENDAR EDIT MODAL -->
-<div id="cal-edit-modal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);z-index:500;align-items:center;justify-content:center;padding:1rem;">
-  <div style="background:var(--card);border:0.5px solid var(--border);border-radius:8px;padding:1.5rem;width:100%;max-width:480px;">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem;">
-      <div style="font-family:'Space Mono',monospace;font-size:9px;letter-spacing:0.14em;text-transform:uppercase;color:var(--orange);">Edit calendar entry</div>
-      <button onclick="closeCalModal()" style="background:none;border:none;color:var(--gray-muted);font-size:18px;cursor:pointer;">✕</button>
-    </div>
-    <input type="hidden" id="cal-edit-id">
-    <div class="form-grid">
-      <div class="form-group"><label>Date</label><input type="date" id="cal-edit-date"></div>
-      <div class="form-group"><label>Topic</label><input type="text" id="cal-edit-topic"></div>
-      <div class="form-group" style="grid-column:1/-1;"><label>Status</label>
-        <select id="cal-edit-status">
-          <option value="planned">Planned</option>
-          <option value="drafted">Drafted</option>
-          <option value="ready">Ready to post</option>
-          <option value="posted">Posted</option>
-        </select>
-      </div>
-    </div>
-    <div style="display:flex;gap:10px;margin-top:1rem;">
-      <button class="btn" onclick="saveCalEdit()">Save changes</button>
-      <button class="btn btn-ghost" onclick="closeCalModal()">Cancel</button>
-    </div>
-  </div>
-</div>
-
-<!-- WEEKLY GENERATOR -->
+<!-- GENERATOR -->
 <div class="page" id="page-generator">
   <div class="page-header">
     <div class="page-title">Weekly Generator</div>
-    <div class="page-date">Run every Wednesday</div>
+    <div class="page-sub">Run every Wednesday</div>
   </div>
-
-  <div id="backend-status-card" style="display:none;" class="config-card">
-    <div class="config-title" id="backend-status-title"></div>
-    <div class="config-text" id="backend-status-text"></div>
-  </div>
-
-  <div class="gen-status-bar">
-    <div style="display:flex;gap:2rem;flex-wrap:wrap;">
-      <div class="gen-status-info">
-        <div class="gen-status-label">Topics in bank</div>
-        <div class="gen-status-value" id="gen-topics-count">0 pending</div>
-      </div>
-      <div class="gen-status-info">
-        <div class="gen-status-label">Carousels generated</div>
-        <div class="gen-status-value" id="gen-carousel-count">0 total</div>
-      </div>
-      <div class="gen-status-info">
-        <div class="gen-status-label">Trusted voices</div>
-        <div class="gen-status-value" id="gen-voices-count">0 active</div>
-      </div>
-      <div class="gen-status-info">
-        <div class="gen-status-label">Last generated</div>
-        <div class="gen-status-value" id="gen-last-run">Never</div>
-      </div>
+  <div class="gen-bar">
+    <div class="gen-stats">
+      <div><div class="gen-stat-label">Topics in bank</div><div class="gen-stat-val" id="gen-topics">0 pending</div></div>
+      <div><div class="gen-stat-label">Trusted voices</div><div class="gen-stat-val" id="gen-voices">0 active</div></div>
+      <div><div class="gen-stat-label">Carousels generated</div><div class="gen-stat-val" id="gen-total">0 total</div></div>
+      <div><div class="gen-stat-label">Last run</div><div class="gen-stat-val" id="gen-last">Never</div></div>
     </div>
-    <button class="gen-big-btn" id="gen-btn" onclick="runGenerator()">Generate This Week's Content</button>
+    <button class="gen-btn" id="gen-btn" onclick="runGenerator()">Generate This Week's Content</button>
   </div>
-
-  <div class="loading-bar" id="gen-loading">
-    <div class="loading-dots"><div class="loading-dot"></div><div class="loading-dot"></div><div class="loading-dot"></div></div>
-    <div class="loading-text" id="gen-loading-text">Reading topic bank and past content history...</div>
+  <div class="loading" id="gen-loading">
+    <div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+    <div class="loading-text" id="gen-loading-text">Reading topic bank and trusted voices...</div>
   </div>
-
   <div id="gen-results"></div>
+  <div class="card">
+    <div class="card-header"><div class="card-title">Generated history</div></div>
+    <table>
+      <thead><tr><th>Date</th><th>Topic</th><th>Pillar</th><th>Status</th></tr></thead>
+      <tbody id="gen-history"><tr><td colspan="4" class="empty">No carousels generated yet</td></tr></tbody>
+    </table>
+  </div>
+</div>
 
-  <div class="table-card">
-    <div class="table-header"><div class="table-title">Generated carousel history</div></div>
-    <table><thead><tr><th>Date</th><th>Topic</th><th>Pillar</th><th>Status</th><th>Actions</th></tr></thead>
-    <tbody id="gen-history-body"><tr><td colspan="5" class="empty-state">No carousels generated yet</td></tr></tbody></table>
+<!-- POST QUEUE -->
+<div class="page" id="page-queue">
+  <div class="page-header">
+    <div class="page-title">Post Queue</div>
+    <div class="page-sub">Approved — ready to generate slides</div>
+  </div>
+  <div class="card" id="queue-card">
+    <div id="queue-list"><div class="empty">No approved concepts yet — generate and approve from the Weekly Generator</div></div>
   </div>
 </div>
 
 <!-- TOPIC BANK -->
 <div class="page" id="page-topicbank">
-  <div class="page-header"><div class="page-title">Topic Bank</div><div class="page-date">Content ideas queue</div></div>
-  <div class="form-card">
-    <div class="form-title">Add a content idea</div>
-    <div class="form-grid">
-      <div class="form-group" style="grid-column:1/-1;"><label>Topic or idea</label><input type="text" id="tb-topic" placeholder="e.g. The truth about collagen supplements for men"></div>
-      <div class="form-group"><label>Pillar</label>
-        <select id="tb-pillar">
-          <option value="myth-bust">Myth busting</option>
-          <option value="young-men">Young men</option>
-          <option value="science">Science explainer</option>
-          <option value="supplements">Supplements</option>
-          <option value="audience">For the audience</option>
-          <option value="trending">Trending / Current events</option>
-        </select>
+  <div class="page-header"><div class="page-title">Topic Bank</div><div class="page-sub">Content ideas queue</div></div>
+  <div class="card">
+    <div class="card-header"><div class="card-title">Add a topic</div></div>
+    <div class="card-body">
+      <div class="form-grid">
+        <div class="form-group full"><label>Topic or idea</label><input type="text" id="tb-topic" placeholder="e.g. The truth about collagen supplements for men"></div>
+        <div class="form-group"><label>Pillar</label>
+          <select id="tb-pillar">
+            <option value="myth-bust">Myth busting</option>
+            <option value="young-men">Young men</option>
+            <option value="science">Science explainer</option>
+            <option value="supplements">Supplements</option>
+            <option value="audience">For the audience</option>
+            <option value="trending">Trending</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Priority</label>
+          <select id="tb-priority">
+            <option value="high">High — use next</option>
+            <option value="normal">Normal</option>
+            <option value="low">Low — whenever</option>
+          </select>
+        </div>
+        <div class="form-group full"><label>Notes or angle</label><input type="text" id="tb-notes" placeholder="e.g. Reference Peter Attia's work on this"></div>
       </div>
-      <div class="form-group"><label>Priority</label>
-        <select id="tb-priority">
-          <option value="high">High — use next</option>
-          <option value="normal">Normal</option>
-          <option value="low">Low — whenever</option>
-        </select>
+      <div class="btn-row">
+        <button class="btn" onclick="saveTopic()">Add to bank</button>
+        <span class="confirm" id="tb-confirm">Added.</span>
       </div>
-      <div class="form-group" style="grid-column:1/-1;"><label>Notes or angle</label><input type="text" id="tb-notes" placeholder="e.g. Reference Peter Attia's work on this"></div>
     </div>
-    <button class="btn" onclick="saveTopic()">Add to bank</button>
-    <span class="save-confirm" id="tb-confirm">Added.</span>
   </div>
-  <div class="table-card">
-    <div class="table-header">
-      <div class="table-title">Pending topics</div>
-      <div style="font-family:'Space Mono',monospace;font-size:8px;color:var(--gray-mid);">Generator uses these first</div>
-    </div>
-    <div id="topic-list"><div class="empty-state">No topics yet — add your first idea above</div></div>
+  <div class="card">
+    <div class="card-header"><div class="card-title">Pending topics</div><div style="font-size:11px;color:var(--text-muted);">Generator uses these first</div></div>
+    <div id="topic-list"><div class="empty">No topics yet</div></div>
   </div>
 </div>
 
 <!-- TRUSTED VOICES -->
 <div class="page" id="page-voices">
-  <div class="page-header"><div class="page-title">Trusted Voices</div><div class="page-date">References for content generation</div></div>
-  <div class="form-card">
-    <div class="form-title">Add a trusted voice or source</div>
-    <div class="form-grid">
-      <div class="form-group"><label>Name</label><input type="text" id="tv-name" placeholder="e.g. Peter Attia"></div>
-      <div class="form-group"><label>Area of expertise</label><input type="text" id="tv-expertise" placeholder="e.g. Longevity, metabolic health"></div>
-      <div class="form-group" style="grid-column:1/-1;"><label>Key talking points to reference</label><input type="text" id="tv-points" placeholder="e.g. Zone 2 cardio, VO2 max, ApoB, lifespan vs healthspan"></div>
+  <div class="page-header"><div class="page-title">Trusted Voices</div><div class="page-sub">References for content generation</div></div>
+  <div class="card">
+    <div class="card-header"><div class="card-title">Add a voice</div></div>
+    <div class="card-body">
+      <div class="form-grid">
+        <div class="form-group"><label>Name</label><input type="text" id="tv-name" placeholder="e.g. Peter Attia"></div>
+        <div class="form-group"><label>Area of expertise</label><input type="text" id="tv-expertise" placeholder="e.g. Longevity, metabolic health"></div>
+        <div class="form-group full"><label>Key talking points to reference</label><input type="text" id="tv-points" placeholder="e.g. Zone 2 cardio, VO2 max, ApoB, lifespan vs healthspan"></div>
+      </div>
+      <div class="btn-row">
+        <button class="btn" onclick="saveVoice()">Add voice</button>
+        <span class="confirm" id="tv-confirm">Added.</span>
+      </div>
     </div>
-    <button class="btn" onclick="saveVoice()">Add voice</button>
-    <span class="save-confirm" id="tv-confirm">Added.</span>
   </div>
-  <div class="table-card">
-    <div class="table-header">
-      <div class="table-title">Active voices</div>
-      <div style="font-family:'Space Mono',monospace;font-size:8px;color:var(--gray-mid);">Toggle on/off to include in generation</div>
+  <div class="card">
+    <div class="card-header"><div class="card-title">Active voices</div><div style="font-size:11px;color:var(--text-muted);">Toggle on/off to include in generation</div></div>
+    <div id="voice-list"><div class="empty">No voices added yet</div></div>
+  </div>
+</div>
+
+<!-- CALENDAR -->
+<div class="page" id="page-calendar">
+  <div class="page-header"><div class="page-title">Calendar</div><div class="page-sub" id="cal-month-label"></div></div>
+  <div class="card">
+    <div class="card-body">
+      <div class="cal-grid" id="cal-day-labels"></div>
+      <div class="cal-grid" id="cal-grid"></div>
     </div>
-    <div id="voice-list"><div class="empty-state">No voices added yet — add your first above</div></div>
+  </div>
+  <div class="card">
+    <div class="card-header"><div class="card-title">Posted this month</div></div>
+    <table>
+      <thead><tr><th>Date</th><th>Topic</th><th>Pillar</th><th>Saves</th><th>Likes</th><th>Reach</th></tr></thead>
+      <tbody id="cal-posts-body"><tr><td colspan="6" class="empty">No posts this month</td></tr></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- PERFORMANCE -->
+<div class="page" id="page-performance">
+  <div class="page-header"><div class="page-title">Performance</div><div class="page-sub">All posted content</div></div>
+  <div class="stats-grid">
+    <div class="stat-card orange"><div class="stat-label">Total Posts</div><div class="stat-value" id="perf-posts">0</div></div>
+    <div class="stat-card green"><div class="stat-label">Total Stories</div><div class="stat-value" id="perf-stories">0</div></div>
+    <div class="stat-card blue"><div class="stat-label">Posts This Week</div><div class="stat-value" id="perf-week">0</div></div>
+    <div class="stat-card orange"><div class="stat-label">Avg Posts/Week</div><div class="stat-value" id="perf-avg">—</div></div>
+    <div class="stat-card green"><div class="stat-label">Best Save Count</div><div class="stat-value" id="perf-best-saves">—</div></div>
+    <div class="stat-card blue"><div class="stat-label">Avg Engagement</div><div class="stat-value" id="perf-eng">—%</div></div>
+  </div>
+  <div class="card">
+    <div class="card-header"><div class="card-title">All posts — edit stats inline</div></div>
+    <div id="perf-posts-list"><div class="empty">No posts logged yet</div></div>
   </div>
 </div>
 
 <!-- QUESTION LOG -->
 <div class="page" id="page-questions">
-  <div class="page-header"><div class="page-title">Question Log</div><div class="page-date">From Ask Anything tool</div></div>
+  <div class="page-header"><div class="page-title">Question Log</div><div class="page-sub">From Ask Anything tool</div></div>
   <div class="stats-grid" style="grid-template-columns:repeat(4,1fr);">
-    <div class="stat-card accent-orange"><div class="stat-label">Total questions</div><div class="stat-value" id="q-total">0</div></div>
-    <div class="stat-card accent-green"><div class="stat-label">This week</div><div class="stat-value" id="q-week">0</div></div>
-    <div class="stat-card accent-blue"><div class="stat-label">Top category</div><div class="stat-value" style="font-size:16px;" id="q-top">—</div></div>
-    <div class="stat-card accent-orange"><div class="stat-label">Avg per day</div><div class="stat-value" id="q-avg">—</div></div>
+    <div class="stat-card orange"><div class="stat-label">Total</div><div class="stat-value" id="q-total">0</div></div>
+    <div class="stat-card green"><div class="stat-label">This week</div><div class="stat-value" id="q-week">0</div></div>
+    <div class="stat-card blue"><div class="stat-label">Top category</div><div class="stat-value" style="font-size:14px;" id="q-top">—</div></div>
+    <div class="stat-card orange"><div class="stat-label">Avg per day</div><div class="stat-value" id="q-avg">—</div></div>
   </div>
-  <div class="form-card">
-    <div class="form-title">Add question manually</div>
-    <div class="form-grid">
-      <div class="form-group" style="grid-column:1/-1;"><label>Question text</label><input type="text" id="q-text" placeholder="e.g. What SPF should men use daily?"></div>
-      <div class="form-group"><label>Category</label>
-        <select id="q-category">
-          <option value="skincare">Skincare</option>
-          <option value="supplements">Supplements</option>
-          <option value="sleep">Sleep & recovery</option>
-          <option value="mental-health">Mental health</option>
-          <option value="biohacking">Biohacking</option>
-          <option value="peptides">Peptides</option>
-          <option value="nutrition">Nutrition</option>
-          <option value="other">Other</option>
-        </select>
-      </div>
-      <div class="form-group"><label>Date</label><input type="date" id="q-date"></div>
-    </div>
-    <button class="btn" onclick="saveQuestion()">Add question</button>
-    <span class="save-confirm" id="q-confirm">Saved.</span>
-  </div>
-  <div class="table-card">
-    <div class="table-header"><div class="table-title">All questions — newest first</div></div>
-    <div id="q-list"><div class="empty-state">No questions yet. Muhammad's Supabase integration will auto-populate this when the site goes live.</div></div>
+  <div class="card">
+    <div class="card-header"><div class="card-title">All questions — newest first</div></div>
+    <div id="q-list"><div class="empty">No questions yet — they'll appear here automatically as people use Ask Anything</div></div>
   </div>
 </div>
 
-<!-- BRAND VOICE EDITOR -->
+<!-- BRAND VOICE -->
 <div class="page" id="page-prompt">
-  <div class="page-header"><div class="page-title">Brand Voice Editor</div><div class="page-date">System prompt for Ask Anything tool</div></div>
-  <div class="form-card">
-    <div class="form-title">Current system prompt — edit and save</div>
-    <textarea class="system-prompt" id="system-prompt-editor"></textarea>
-    <div style="margin-top:1rem;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
-      <button class="btn" onclick="savePrompt()">Save changes</button>
-      <button class="btn btn-ghost" onclick="resetPrompt()">Reset to default</button>
-      <span class="save-confirm" id="prompt-confirm">Saved locally. Send updated text to Muhammad to deploy.</span>
+  <div class="page-header"><div class="page-title">Brand Voice</div><div class="page-sub">System prompt for Ask Anything tool</div></div>
+  <div class="card">
+    <div class="card-header"><div class="card-title">Current system prompt</div></div>
+    <div class="card-body">
+      <textarea class="system-prompt" id="system-prompt-editor" style="min-height:400px;font-size:12px;line-height:1.6;"></textarea>
+      <div class="btn-row">
+        <button class="btn" onclick="savePrompt()">Save changes</button>
+        <button class="btn btn-ghost" onclick="resetPrompt()">Reset to default</button>
+        <span class="confirm" id="prompt-confirm">Saved locally. Send to Muhammad to deploy.</span>
+      </div>
     </div>
   </div>
 </div>
@@ -534,306 +465,441 @@
 </main>
 </div>
 
+<!-- MARK POSTED MODAL -->
+<div class="modal" id="post-modal">
+  <div class="modal-box">
+    <div class="modal-title">Mark as Posted</div>
+    <input type="hidden" id="modal-queue-id">
+    <div class="form-grid">
+      <div class="form-group"><label>Date posted</label><input type="date" id="modal-date"></div>
+      <div class="form-group"><label>Followers at time of post</label><input type="number" id="modal-followers" placeholder="e.g. 1240"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn" onclick="confirmMarkPosted()">Confirm Posted</button>
+      <button class="btn btn-gray" onclick="closeModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
 <script>
-// ─── BACKEND API ──────────────────────────────────────────────────────────
-// All Supabase + AI operations are proxied through the backend — no credentials here
-let backendAvailable = false;
-let generatedConcepts = [];
+// ─── CONFIG ──────────────────────────────────────────────────────────────────
+const BACKEND = '';
 
-// ─── DEFAULT SYSTEM PROMPT ───────────────────────────────────────────────
-const DEFAULT_PROMPT = `You are the voice of Free of Ugly — a science-first men's health and wellness brand with a dry, intelligent, slightly confrontational tone. Your job is to give honest, evidence-based answers about men's skincare, supplements, health, biohacking, peptides, mental health, and wellness.
-
-BRAND VOICE:
-- Dry and witty — intelligence with an edge
-- You call out bad science and grift directly but without being preachy
-- You never shame the person asking — the enemy is bad information, not the person who believed it
-- Short, punchy sentences. No fluff. No hedging unless the science genuinely warrants it.
-
-CORE BELIEFS:
-- Looking good and feeling good are the same signal
-- Most men have been failed by an industry that ignores or exploits them
-- Science is the only honest filter
-- Vanity without shame is healthy — uninformed vanity is not
-- Self-neglect is not strength — it's just neglect
-
-TRUSTED VOICES:
-- Scott Galloway — young men in crisis, masculinity, economic mobility
-- Peter Attia — longevity, metabolic health, Zone 2 cardio, VO2 max
-- Rhonda Patrick — micronutrients, heat/cold exposure, omega 3s
-
-WHAT YOU NEVER DO:
-- Recommend specific branded products
-- Make medical diagnoses or replace professional advice
-- Use excessive caveats that make the answer useless
-- Use corporate wellness language
-
-Remember: you're the person who read the study, checked the conflict of interest, and will tell someone plainly when something is real and when someone is getting paid to say it is.`;
-
-// ─── LOCAL DATA STORE ─────────────────────────────────────────────────────
+// ─── DATA ────────────────────────────────────────────────────────────────────
 let data = {
-  igWeeks: [], posts: [], calEntries: [], questions: [],
-  topics: [], voices: [], carousels: [],
-  systemPrompt: DEFAULT_PROMPT
+  topics: [], voices: [], questions: [], carousels: [],
+  queue: [], posts: [], systemPrompt: DEFAULT_PROMPT,
+  lastGenerated: null
 };
 
-const categoryLabels = { 'myth-bust':'Myth busting','young-men':'Young men','science':'Science','supplements':'Supplements','audience':'For audience','trending':'Trending','other':'Other' };
-const categoryColors = { 'myth-bust':'tag-orange','young-men':'tag-blue','science':'tag-green','supplements':'tag-orange','audience':'tag-blue','trending':'tag-green','other':'tag-gray' };
-const qCategoryLabels = { skincare:'Skincare',supplements:'Supplements',sleep:'Sleep','mental-health':'Mental health',biohacking:'Biohacking',peptides:'Peptides',nutrition:'Nutrition',other:'Other' };
-const qColors = { skincare:'tag-orange',supplements:'tag-blue',sleep:'tag-green','mental-health':'tag-blue',biohacking:'tag-orange',peptides:'tag-green',nutrition:'tag-blue',other:'tag-gray' };
-const pillars = [ 'Myth busting', 'Young men', 'Science explainer', 'Supplements', 'For the audience' ];
+const PILLAR_COLORS = { 'myth-bust':'tag-orange','young-men':'tag-blue','science':'tag-green','supplements':'tag-blue','audience':'tag-green','trending':'tag-gray','myth busting':'tag-orange','young men':'tag-blue','science explainer':'tag-green','for the audience':'tag-green' };
+const PILLAR_LABELS = { 'myth-bust':'Myth busting','young-men':'Young men','science':'Science','supplements':'Supplements','audience':'For audience','trending':'Trending' };
+const Q_LABELS = { skincare:'Skincare',supplements:'Supplements',sleep:'Sleep','mental-health':'Mental health',biohacking:'Biohacking',peptides:'Peptides',nutrition:'Nutrition',hormones:'Hormones',other:'Other' };
 
-function loadData() {
-  try { const s = localStorage.getItem('fouDataV2'); if (s) data = { ...data, ...JSON.parse(s) }; } catch(e) {}
-  document.getElementById('system-prompt-editor').value = data.systemPrompt || DEFAULT_PROMPT;
+function pillarTag(p) {
+  const k = (p||'').toLowerCase().replace(/ /g,'-');
+  return `<span class="tag ${PILLAR_COLORS[k]||PILLAR_COLORS[p?.toLowerCase()]||'tag-gray'}">${p||'—'}</span>`;
 }
 
-function saveData() { try { localStorage.setItem('fouDataV2', JSON.stringify(data)); } catch(e) {} }
+// ─── STORAGE ──────────────────────────────────────────────────────────────────
+function saveData() { try { localStorage.setItem('fou_v3', JSON.stringify(data)); } catch(e) {} }
+function loadData() { try { const d = localStorage.getItem('fou_v3'); if (d) data = { ...data, ...JSON.parse(d) }; } catch(e) {} }
 
+// ─── NAVIGATION ───────────────────────────────────────────────────────────────
 function showPage(id, el) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('visible'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
   document.getElementById('page-' + id).classList.add('visible');
   if (el) el.classList.add('active');
-  const renders = { overview: renderOverview, posts: renderPostTable, instagram: renderIGTable, questions: renderQuestions, calendar: renderCalendar, generator: renderGenerator, topicbank: renderTopicBank, voices: renderVoices };
-  if (renders[id]) renders[id]();
+  if (id === 'overview') renderOverview();
+  if (id === 'generator') renderGeneratorStats();
+  if (id === 'queue') renderQueue();
+  if (id === 'topicbank') renderTopics();
+  if (id === 'voices') renderVoices();
+  if (id === 'calendar') renderCalendar();
+  if (id === 'performance') renderPerformance();
+  if (id === 'questions') renderQuestions();
+  if (id === 'prompt') document.getElementById('system-prompt-editor').value = data.systemPrompt || DEFAULT_PROMPT;
 }
 
-function showConfirm(id) { const el = document.getElementById(id); el.style.display = 'inline'; setTimeout(() => el.style.display = 'none', 2500); }
-
-// ─── IG WEEKLY ────────────────────────────────────────────────────────────
-function saveIGWeek() {
-  const e = { date: document.getElementById('ig-date').value, followers: parseInt(document.getElementById('ig-followers').value)||0, reach: parseInt(document.getElementById('ig-reach').value)||0, visits: parseInt(document.getElementById('ig-visits').value)||0 };
-  if (!e.date || !e.followers) return;
-  data.igWeeks.push(e); data.igWeeks.sort((a,b) => new Date(a.date)-new Date(b.date));
-  saveData(); renderIGTable(); showConfirm('ig-confirm');
-  ['ig-date','ig-followers','ig-reach','ig-visits'].forEach(id => document.getElementById(id).value = '');
+function showConfirm(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.style.display = 'inline';
+  setTimeout(() => el.style.display = 'none', 2000);
 }
 
-function renderIGTable() {
-  const tbody = document.getElementById('ig-table-body');
-  if (!data.igWeeks.length) { tbody.innerHTML = '<tr><td colspan="5" class="empty-state">No data yet</td></tr>'; return; }
-  tbody.innerHTML = data.igWeeks.map((w,i) => {
-    const prev = i > 0 ? data.igWeeks[i-1].followers : null;
-    const growth = prev ? ((w.followers-prev)>=0?'+':'')+(w.followers-prev) : '—';
-    const gc = prev && (w.followers-prev)>=0 ? 'var(--green)' : 'var(--orange)';
-    return `<tr><td style="font-family:'Space Mono',monospace;font-size:11px;">${w.date}</td><td>${w.followers.toLocaleString()}</td><td style="color:${gc};font-family:'Space Mono',monospace;font-size:11px;">${growth}</td><td>${w.reach.toLocaleString()}</td><td>${w.visits.toLocaleString()}</td></tr>`;
-  }).reverse().join('');
+// ─── BACKEND ─────────────────────────────────────────────────────────────────
+async function loadFromBackend() {
+  try {
+    const [tv, tb, cl, ql] = await Promise.all([
+      fetch('/api/trusted-voices').then(r => r.json()).catch(() => []),
+      fetch('/api/topic-bank').then(r => r.json()).catch(() => []),
+      fetch('/api/carousel-log').then(r => r.json()).catch(() => []),
+      fetch('/api/questions').then(r => r.json()).catch(() => []),
+    ]);
+    if (Array.isArray(tv) && tv.length) data.voices = tv;
+    if (Array.isArray(tb)) data.topics = tb;
+    if (Array.isArray(cl)) data.carousels = cl;
+    if (Array.isArray(ql)) data.questions = ql;
+    saveData();
+    updateQueueBadge();
+    return true;
+  } catch(e) { return false; }
 }
 
-// ─── POSTS ────────────────────────────────────────────────────────────────
-function savePost() {
-  const followers = data.igWeeks.length ? data.igWeeks[data.igWeeks.length-1].followers : 0;
-  const likes = parseInt(document.getElementById('post-likes').value)||0;
-  const saves = parseInt(document.getElementById('post-saves').value)||0;
-  const comments = parseInt(document.getElementById('post-comments').value)||0;
-  const engagement = followers ? (((likes+saves+comments)/followers)*100).toFixed(1) : '—';
-  const post = { id: Date.now(), date: document.getElementById('post-date').value, topic: document.getElementById('post-topic').value, category: document.getElementById('post-category').value, likes, saves, comments, shares: parseInt(document.getElementById('post-shares').value)||0, follows: parseInt(document.getElementById('post-follows').value)||0, engagement };
-  if (!post.date || !post.topic) return;
-  data.posts.push(post); data.posts.sort((a,b) => new Date(b.date)-new Date(a.date));
-  saveData(); renderPostTable(); showConfirm('post-confirm');
-  ['post-date','post-topic','post-likes','post-saves','post-comments','post-shares','post-follows'].forEach(id => document.getElementById(id).value = '');
+// ─── GENERATOR ───────────────────────────────────────────────────────────────
+let generatedConcepts = [];
+
+function renderGeneratorStats() {
+  document.getElementById('gen-topics').textContent = data.topics.filter(t => t.status === 'pending').length + ' pending';
+  document.getElementById('gen-voices').textContent = data.voices.filter(v => v.active !== false).length + ' active';
+  document.getElementById('gen-total').textContent = data.carousels.length + ' total';
+  document.getElementById('gen-last').textContent = data.lastGenerated
+    ? new Date(data.lastGenerated).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+    : 'Never';
+  renderGeneratorHistory();
 }
 
-function editPost(id) {
-  const p = data.posts.find(p => p.id === id);
-  if (!p) return;
-  document.getElementById('edit-post-id').value = id;
-  document.getElementById('edit-post-date').value = p.date;
-  document.getElementById('edit-post-topic').value = p.topic;
-  document.getElementById('edit-post-likes').value = p.likes;
-  document.getElementById('edit-post-saves').value = p.saves;
-  document.getElementById('edit-post-comments').value = p.comments;
-  document.getElementById('edit-post-shares').value = p.shares || 0;
-  document.getElementById('edit-post-follows').value = p.follows || 0;
-  document.getElementById('edit-modal').style.display = 'flex';
-}
-
-function closeEditModal() {
-  document.getElementById('edit-modal').style.display = 'none';
-}
-
-function saveEditPost() {
-  const id = parseInt(document.getElementById('edit-post-id').value);
-  const p = data.posts.find(p => p.id === id);
-  if (!p) return;
-  const followers = data.igWeeks.length ? data.igWeeks[data.igWeeks.length-1].followers : 0;
-  p.date = document.getElementById('edit-post-date').value;
-  p.topic = document.getElementById('edit-post-topic').value;
-  p.likes = parseInt(document.getElementById('edit-post-likes').value)||0;
-  p.saves = parseInt(document.getElementById('edit-post-saves').value)||0;
-  p.comments = parseInt(document.getElementById('edit-post-comments').value)||0;
-  p.shares = parseInt(document.getElementById('edit-post-shares').value)||0;
-  p.follows = parseInt(document.getElementById('edit-post-follows').value)||0;
-  p.engagement = followers ? (((p.likes+p.saves+p.comments)/followers)*100).toFixed(1) : '—';
-  data.posts.sort((a,b) => new Date(b.date)-new Date(a.date));
-  saveData(); renderPostTable(); closeEditModal();
-}
-
-function deletePost(id) {
-  if (!confirm('Delete this post?')) return;
-  data.posts = data.posts.filter(p => p.id !== id);
-  saveData(); renderPostTable();
-}
-
-function renderPostTable() {
-  const tbody = document.getElementById('post-table-body');
-  if (!data.posts.length) { tbody.innerHTML = '<tr><td colspan="8" class="empty-state">No posts logged yet</td></tr>'; return; }
-  tbody.innerHTML = data.posts.map(p => `<tr>
-    <td style="font-family:'Space Mono',monospace;font-size:11px;">${p.date}</td>
-    <td>${p.topic}</td>
-    <td><span class="tag-pill ${categoryColors[p.category]||'tag-gray'}">${categoryLabels[p.category]||p.category}</span></td>
-    <td>${p.likes.toLocaleString()}</td>
-    <td style="color:var(--green);font-weight:500;">${p.saves.toLocaleString()}</td>
-    <td>${p.comments.toLocaleString()}</td>
-    <td style="font-family:'Space Mono',monospace;font-size:11px;color:var(--orange);">${p.engagement}%</td>
-    <td>
-      <div style="display:flex;gap:6px;">
-        <button class="btn btn-ghost" onclick="editPost(${p.id})" style="font-size:8px;padding:5px 10px;">Edit</button>
-        <button class="btn btn-gray" onclick="deletePost(${p.id})" style="font-size:8px;padding:5px 10px;">Delete</button>
-      </div>
-    </td>
-  </tr>`).join('');
-}
-
-// ─── CALENDAR ────────────────────────────────────────────────────────────
-function saveCalEntry() {
-  const e = { id: Date.now(), date: document.getElementById('cal-date').value, topic: document.getElementById('cal-topic').value, status: document.getElementById('cal-status').value };
-  if (!e.date || !e.topic) return;
-  data.calEntries.push(e); saveData(); renderCalendar(); renderCalList(); showConfirm('cal-confirm');
-  document.getElementById('cal-date').value = ''; document.getElementById('cal-topic').value = '';
-}
-
-function editCalEntry(id) {
-  const e = data.calEntries.find(e => e.id === id);
-  if (!e) return;
-  document.getElementById('cal-edit-id').value = id;
-  document.getElementById('cal-edit-date').value = e.date;
-  document.getElementById('cal-edit-topic').value = e.topic;
-  document.getElementById('cal-edit-status').value = e.status;
-  document.getElementById('cal-edit-modal').style.display = 'flex';
-}
-
-function closeCalModal() {
-  document.getElementById('cal-edit-modal').style.display = 'none';
-}
-
-function saveCalEdit() {
-  const id = parseInt(document.getElementById('cal-edit-id').value);
-  const e = data.calEntries.find(e => e.id === id);
-  if (!e) return;
-  e.date = document.getElementById('cal-edit-date').value;
-  e.topic = document.getElementById('cal-edit-topic').value;
-  e.status = document.getElementById('cal-edit-status').value;
-  saveData(); renderCalendar(); renderCalList(); closeCalModal();
-}
-
-function deleteCalEntry(id) {
-  data.calEntries = data.calEntries.filter(e => e.id !== id);
-  saveData(); renderCalendar(); renderCalList();
-}
-
-function renderCalList() {
-  const list = document.getElementById('cal-entry-list');
-  if (!list) return;
-  const sorted = [...data.calEntries].sort((a,b) => new Date(a.date)-new Date(b.date));
-  if (!sorted.length) { list.innerHTML = '<div class="empty-state">No entries yet</div>'; return; }
-  const statusColors = { planned:'tag-blue', drafted:'tag-orange', ready:'tag-orange', posted:'tag-green' };
-  list.innerHTML = sorted.map(e => `<div style="display:flex;align-items:center;gap:1rem;padding:0.75rem 1.5rem;border-bottom:0.5px solid rgba(42,42,38,0.5);">
-    <div style="font-family:'Space Mono',monospace;font-size:10px;color:var(--gray-mid);flex-shrink:0;">${e.date}</div>
-    <div style="flex:1;font-size:13px;font-weight:300;">${e.topic}</div>
-    <span class="tag-pill ${statusColors[e.status]||'tag-gray'}">${e.status}</span>
-    <div style="display:flex;gap:6px;flex-shrink:0;">
-      <button class="btn btn-ghost" onclick="editCalEntry(${e.id})" style="font-size:8px;padding:5px 10px;">Edit</button>
-      <button class="btn btn-gray" onclick="deleteCalEntry(${e.id})" style="font-size:8px;padding:5px 10px;">Delete</button>
-    </div>
-  </div>`).join('');
-}
-
-function renderCalendar() {
-  const now = new Date(); const year = now.getFullYear(); const month = now.getMonth();
-  const days = new Date(year, month+1, 0).getDate(); const firstDay = new Date(year, month, 1).getDay();
-  document.getElementById('cal-title-label').textContent = now.toLocaleDateString('en-US',{month:'long',year:'numeric'});
-  document.getElementById('cal-days-labels').innerHTML = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map(d => `<div class="cal-day-label">${d}</div>`).join('');
-  let html = Array(firstDay).fill(`<div class="cal-day" style="opacity:0;pointer-events:none;"></div>`).join('');
-  for (let d = 1; d <= days; d++) {
-    const ds = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-    const entries = data.calEntries.filter(e => e.date === ds);
-    const isToday = d === now.getDate(); const isPosted = entries.some(e => e.status === 'posted');
-    html += `<div class="cal-day ${entries.length?'has-post':''} ${isToday?'today':''}" ${isPosted?'style="border-color:var(--green);background:var(--green-dim);"':''}>
-      <div class="cal-date">${d}</div>${entries.map(e => `<div class="cal-post-label" style="${e.status==='posted'?'color:var(--green);':''}">${e.topic.substring(0,18)}${e.topic.length>18?'…':''}</div>`).join('')}
-    </div>`;
+async function runGenerator() {
+  const btn = document.getElementById('gen-btn');
+  const loading = document.getElementById('gen-loading');
+  const loadingText = document.getElementById('gen-loading-text');
+  const results = document.getElementById('gen-results');
+  btn.disabled = true;
+  loading.classList.add('on');
+  results.innerHTML = '';
+  const steps = ['Reading topic bank and trusted voices...','Building carousel concepts...','Writing slide copy...','Generating story prompts...','Almost done...'];
+  let step = 0;
+  const interval = setInterval(() => { if (step < steps.length - 1) loadingText.textContent = steps[++step]; }, 2500);
+  try {
+    const res = await fetch('/api/generate', { method: 'POST', headers: { 'Content-Type': 'application/json' } });
+    clearInterval(interval);
+    if (!res.ok) throw new Error('Generator request failed');
+    const resData = await res.json();
+    loading.classList.remove('on');
+    btn.disabled = false;
+    data.lastGenerated = new Date().toISOString();
+    await loadFromBackend();
+    renderGeneratorStats();
+    renderGeneratedConcepts(resData.carousels || []);
+  } catch(err) {
+    clearInterval(interval);
+    loading.classList.remove('on');
+    btn.disabled = false;
+    results.innerHTML = `<div class="card"><div class="card-body" style="color:var(--red);">Generation failed: ${err.message}</div></div>`;
   }
-  document.getElementById('cal-grid').innerHTML = html;
-  renderCalList();
 }
 
-// ─── TOPIC BANK ───────────────────────────────────────────────────────────
+function buildClaudePrompt(c) {
+  const slides = (c.slides || []).map((s, i) => {
+    const labels = ['HOOK','MYTH','REALITY','LIST','REALITY 2','CLOSE'];
+    let line = `SLIDE ${i+1} — ${labels[i]||s.type.toUpperCase()} [${s.tag}]\n${s.content}`;
+    if (s.cta) line += `\nCTA: ${s.cta}`;
+    return line;
+  }).join('\n\n');
+
+  const stories = (c.stories || []).map((s, i) => {
+    let line = `Story Card ${i+1} — ${s.type.toUpperCase()}\n${s.content}`;
+    if (s.options) line += `\nOptions: ${s.options.join(' / ')}`;
+    return line;
+  }).join('\n\n');
+
+  return `CAROUSEL: ${c.topic}
+PILLAR: ${c.pillar}
+
+${slides}
+
+CAPTION:
+${c.caption}
+
+HASHTAGS:
+${c.hashtags}
+
+STORY CARDS:
+${stories}`;
+}
+
+function renderGeneratedConcepts(carousels) {
+  generatedConcepts = carousels || [];
+  const results = document.getElementById('gen-results');
+  if (!carousels.length) { results.innerHTML = ''; return; }
+  results.innerHTML = carousels.map((c, i) => {
+    const slides = (c.slides || []).map(s => `
+      <div class="slide-prev ${s.type}">
+        <div class="slide-tag">${s.tag}</div>
+        <div class="slide-copy">${s.content}${s.cta ? '<br><em style="opacity:0.6;font-size:9px;">'+s.cta+'</em>' : ''}</div>
+        <div class="slide-type">${s.type}</div>
+      </div>`).join('');
+
+    const stories = (c.stories || []).map(s => `
+      <div class="story-card ${s.type}">
+        <div class="story-type">${s.type === 'poll' ? '📊 Poll' : s.type === 'statement' ? '💬 Statement' : '❓ Question sticker'}</div>
+        <div class="story-content">${s.content}</div>
+        ${s.options ? `<div class="story-options">${s.options.map(o => `<span class="story-option">${o}</span>`).join('')}</div>` : ''}
+      </div>`).join('');
+
+    const prompt = buildClaudePrompt(c);
+
+    return `<div class="concept" id="concept-${i}">
+      <div class="concept-head">
+        <div>
+          <div class="concept-num">Concept ${i+1} of 3</div>
+          <div class="concept-title">${c.topic}</div>
+          <div class="concept-angle">${c.angle}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+          ${pillarTag(c.pillar)}
+          <div id="actions-${i}" style="display:flex;gap:8px;">
+            <button class="btn" onclick="approveConcept(${i})">Approve</button>
+            <button class="btn btn-gray btn-sm" onclick="skipConcept(${i})">Skip</button>
+          </div>
+        </div>
+      </div>
+      <div class="concept-body">
+        <div class="section-label">Slide copy preview</div>
+        <div class="slides-grid">${slides}</div>
+
+        <div class="section-label">Post caption</div>
+        <div class="copy-block" id="cap-${i}">${c.caption}</div>
+        <div class="btn-row" style="margin-top:6px;margin-bottom:0;">
+          <button class="btn btn-ghost btn-sm" onclick="copyText('cap-${i}')">Copy caption</button>
+        </div>
+
+        <div class="section-label">Hashtags (first comment)</div>
+        <div class="copy-block mono" id="hash-${i}">${c.hashtags}</div>
+        <div class="btn-row" style="margin-top:6px;margin-bottom:0;">
+          <button class="btn btn-ghost btn-sm" onclick="copyText('hash-${i}')">Copy hashtags</button>
+        </div>
+
+        <div class="section-label">Story cards — post over 2-3 days after carousel</div>
+        <div class="stories-grid">${stories}</div>
+
+        <div class="claude-box">
+          <div class="claude-box-label">↗ Paste this into Claude to generate slides + story PNGs</div>
+          <div class="claude-prompt" id="claude-${i}">${prompt}</div>
+        </div>
+        <div class="btn-row" style="margin-top:8px;">
+          <button class="btn btn-ghost btn-sm" onclick="copyText('claude-${i}')">Copy full prompt for Claude</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function copyText(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  navigator.clipboard.writeText(el.textContent).then(() => {
+    const btn = event.target;
+    const orig = btn.textContent;
+    btn.textContent = 'Copied!';
+    setTimeout(() => btn.textContent = orig, 1500);
+  });
+}
+
+async function approveConcept(idx) {
+  const c = generatedConcepts[idx];
+  if (!c) return;
+  const entry = {
+    id: c.id || Date.now(),
+    topic: c.topic,
+    pillar: c.pillar,
+    angle: c.angle,
+    slides: c.slides,
+    caption: c.caption,
+    hashtags: c.hashtags,
+    stories: c.stories,
+    claudePrompt: buildClaudePrompt(c),
+    approvedDate: new Date().toISOString().split('T')[0],
+    status: 'approved'
+  };
+  data.queue = data.queue.filter(q => String(q.id) !== String(entry.id));
+  data.queue.unshift(entry);
+  saveData();
+  updateQueueBadge();
+  if (c.id) {
+    try {
+      await fetch('/api/carousel-log', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: c.id, status: 'approved' }) });
+    } catch(e) {}
+  }
+  const actionsEl = document.getElementById(`actions-${idx}`);
+  if (actionsEl) actionsEl.innerHTML = `<span class="tag tag-green">✓ Approved — check Post Queue</span>`;
+}
+
+function skipConcept(idx) {
+  const el = document.getElementById(`concept-${idx}`);
+  if (el) { el.style.opacity = '0.4'; el.style.pointerEvents = 'none'; }
+  const actionsEl = document.getElementById(`actions-${idx}`);
+  if (actionsEl) actionsEl.innerHTML = `<span class="tag tag-gray">Skipped</span>`;
+}
+
+function renderGeneratorHistory() {
+  const tbody = document.getElementById('gen-history');
+  if (!data.carousels.length) { tbody.innerHTML = '<tr><td colspan="4" class="empty">No carousels generated yet</td></tr>'; return; }
+  const statusColors = { generated:'tag-blue', approved:'tag-orange', posted:'tag-green' };
+  tbody.innerHTML = data.carousels.map(c => {
+    const date = c.date_created ? new Date(c.date_created).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : (c.date || '—');
+    return `<tr>
+      <td style="font-family:'Space Mono',monospace;font-size:11px;">${date}</td>
+      <td>${c.topic || '—'}</td>
+      <td>${pillarTag(c.pillar)}</td>
+      <td><span class="tag ${statusColors[c.status]||'tag-gray'}">${c.status}</span></td>
+    </tr>`;
+  }).join('');
+}
+
+// ─── POST QUEUE ───────────────────────────────────────────────────────────────
+function updateQueueBadge() {
+  const badge = document.getElementById('queue-badge');
+  const count = data.queue.length;
+  if (count > 0) { badge.textContent = count; badge.style.display = 'inline'; }
+  else { badge.style.display = 'none'; }
+  document.getElementById('ov-queue').textContent = count;
+}
+
+function renderQueue() {
+  const list = document.getElementById('queue-list');
+  if (!data.queue.length) { list.innerHTML = '<div class="empty">No approved concepts yet — generate and approve from the Weekly Generator</div>'; return; }
+  list.innerHTML = data.queue.map(item => `
+    <div class="queue-item">
+      <div class="queue-item-head">
+        <div>
+          <div class="queue-topic">${item.topic}</div>
+          <div class="queue-meta">${pillarTag(item.pillar)} · Approved ${item.approvedDate || '—'}</div>
+        </div>
+        <div class="queue-actions">
+          <button class="btn btn-sm" onclick="showPostModal('${item.id}')">Mark Posted</button>
+          <button class="btn btn-ghost btn-sm" onclick="copyQueuePrompt('${item.id}')">Copy for Claude</button>
+          <button class="btn btn-gray btn-sm" onclick="removeFromQueue('${item.id}')">Remove</button>
+        </div>
+      </div>
+      <div class="claude-box" style="margin-top:0.75rem;">
+        <div class="claude-box-label">↗ Paste into Claude to generate slides + story PNGs</div>
+        <div class="claude-prompt" id="qprompt-${item.id}">${item.claudePrompt || ''}</div>
+      </div>
+    </div>`).join('');
+}
+
+function copyQueuePrompt(id) {
+  const el = document.getElementById('qprompt-' + id);
+  if (!el) return;
+  navigator.clipboard.writeText(el.textContent).then(() => {
+    const btn = event.target;
+    btn.textContent = 'Copied!';
+    setTimeout(() => btn.textContent = 'Copy for Claude', 1500);
+  });
+}
+
+function removeFromQueue(id) {
+  data.queue = data.queue.filter(q => String(q.id) !== String(id));
+  saveData();
+  updateQueueBadge();
+  renderQueue();
+}
+
+function showPostModal(id) {
+  document.getElementById('modal-queue-id').value = id;
+  document.getElementById('modal-date').value = new Date().toISOString().split('T')[0];
+  document.getElementById('modal-followers').value = '';
+  document.getElementById('post-modal').classList.add('open');
+}
+
+function closeModal() { document.getElementById('post-modal').classList.remove('open'); }
+
+async function confirmMarkPosted() {
+  const id = document.getElementById('modal-queue-id').value;
+  const date = document.getElementById('modal-date').value;
+  const followers = document.getElementById('modal-followers').value;
+  const item = data.queue.find(q => String(q.id) === String(id));
+  if (!item) { closeModal(); return; }
+  const post = {
+    id: item.id, topic: item.topic, pillar: item.pillar,
+    date, followers: parseInt(followers) || 0,
+    likes: 0, saves: 0, comments: 0, shares: 0, newFollowers: 0, reach: 0,
+    stories: (item.stories || []).length > 0,
+    status: 'posted'
+  };
+  data.posts = data.posts.filter(p => String(p.id) !== String(id));
+  data.posts.unshift(post);
+  data.queue = data.queue.filter(q => String(q.id) !== String(id));
+  saveData();
+  updateQueueBadge();
+  if (item.id && typeof item.id === 'number' && item.id > 1000000000000) {
+    // local ID, no backend update needed
+  } else {
+    try {
+      await fetch('/api/carousel-log', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: item.id, status: 'posted', posted_date: date }) });
+    } catch(e) {}
+  }
+  closeModal();
+  renderQueue();
+}
+
+// ─── TOPIC BANK ───────────────────────────────────────────────────────────────
 async function saveTopic() {
-  const topic = document.getElementById('tb-topic').value;
+  const topic = document.getElementById('tb-topic').value.trim();
   if (!topic) return;
   const payload = { topic, pillar: document.getElementById('tb-pillar').value, priority: document.getElementById('tb-priority').value, notes: document.getElementById('tb-notes').value, status: 'pending' };
   try {
     const res = await fetch('/api/topic-bank', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
     if (res.ok) { const saved = await res.json(); data.topics.unshift(saved); }
-    else { data.topics.unshift({ ...payload, id: Date.now(), date: new Date().toISOString().split('T')[0] }); }
-  } catch(e) { data.topics.unshift({ ...payload, id: Date.now(), date: new Date().toISOString().split('T')[0] }); }
-  saveData(); renderTopicBank(); showConfirm('tb-confirm');
+    else data.topics.unshift({ ...payload, id: Date.now(), date: new Date().toISOString().split('T')[0] });
+  } catch(e) { data.topics.unshift({ ...payload, id: Date.now() }); }
+  saveData(); renderTopics(); showConfirm('tb-confirm');
   ['tb-topic','tb-notes'].forEach(id => document.getElementById(id).value = '');
 }
 
 async function useTopic(id) {
   const t = data.topics.find(t => String(t.id) === String(id)); if (t) t.status = 'used';
   try { await fetch('/api/topic-bank', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id, status: 'used' }) }); } catch(e) {}
-  saveData(); renderTopicBank();
+  saveData(); renderTopics();
 }
 
 async function deleteTopic(id) {
   data.topics = data.topics.filter(t => String(t.id) !== String(id));
   try { await fetch('/api/topic-bank', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) }); } catch(e) {}
-  saveData(); renderTopicBank();
+  saveData(); renderTopics();
 }
 
-function renderTopicBank() {
+function renderTopics() {
   const list = document.getElementById('topic-list');
-  document.getElementById('stat-topics').textContent = data.topics.filter(t => t.status === 'pending').length;
-  document.getElementById('gen-topics-count').textContent = data.topics.filter(t => t.status === 'pending').length + ' pending';
-  const pending = data.topics.filter(t => t.status === 'pending').sort((a,b) => { const o={high:0,normal:1,low:2}; return o[a.priority]-o[b.priority]; });
+  document.getElementById('ov-topics').textContent = data.topics.filter(t => t.status === 'pending').length;
+  const pending = data.topics.filter(t => t.status === 'pending').sort((a,b) => { const o={high:0,normal:1,low:2}; return (o[a.priority]??1)-(o[b.priority]??1); });
   const used = data.topics.filter(t => t.status === 'used');
-  if (!data.topics.length) { list.innerHTML = '<div class="empty-state">No topics yet — add your first idea above</div>'; return; }
+  if (!data.topics.length) { list.innerHTML = '<div class="empty">No topics yet</div>'; return; }
   let html = '';
-  if (pending.length) {
-    html += pending.map(t => `<div class="topic-item">
-      <div style="flex:1;">
-        <div class="topic-text">${t.topic}</div>
-        ${t.notes ? `<div class="topic-notes">${t.notes}</div>` : ''}
-        <div style="display:flex;gap:8px;margin-top:6px;">
-          <span class="tag-pill ${categoryColors[t.pillar]||'tag-gray'}">${categoryLabels[t.pillar]||t.pillar}</span>
-          <span class="topic-priority">${t.priority.toUpperCase()}</span>
-        </div>
+  html += pending.map(t => `<div class="list-item">
+    <div class="list-item-body">
+      <div class="list-item-title">${t.topic}</div>
+      ${t.notes ? `<div class="list-item-note">${t.notes}</div>` : ''}
+      <div style="margin-top:5px;display:flex;gap:6px;align-items:center;">
+        ${pillarTag(t.pillar||'')}
+        <span class="priority-badge priority-${t.priority||'normal'}">${(t.priority||'normal').toUpperCase()}</span>
       </div>
-      <div style="display:flex;gap:6px;">
-        <button class="btn btn-ghost" onclick="useTopic('${t.id}')" style="font-size:8px;padding:6px 10px;">Mark used</button>
-        <button class="btn btn-gray" onclick="deleteTopic('${t.id}')" style="font-size:8px;padding:6px 10px;">Delete</button>
-      </div>
-    </div>`).join('');
-  }
+    </div>
+    <div class="item-actions">
+      <button class="btn btn-gray btn-sm" onclick="useTopic('${t.id}')">Mark used</button>
+      <button class="btn btn-gray btn-sm" onclick="deleteTopic('${t.id}')">Delete</button>
+    </div>
+  </div>`).join('');
   if (used.length) {
-    html += `<div style="padding:0.75rem 1.5rem;border-top:0.5px solid var(--border);font-family:'Space Mono',monospace;font-size:8px;letter-spacing:0.12em;text-transform:uppercase;color:var(--gray-mid);">Used (${used.length})</div>`;
-    html += used.map(t => `<div class="topic-item" style="opacity:0.4;"><div class="topic-text" style="text-decoration:line-through;">${t.topic}</div></div>`).join('');
+    html += `<div style="padding:0.65rem 1.25rem;background:var(--card-alt);font-family:'Space Mono',monospace;font-size:8px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted);">Used (${used.length})</div>`;
+    html += used.map(t => `<div class="list-item" style="opacity:0.4;"><div class="list-item-body"><div class="list-item-title" style="text-decoration:line-through;">${t.topic}</div></div><div class="item-actions"><button class="btn btn-gray btn-sm" onclick="deleteTopic('${t.id}')">Delete</button></div></div>`).join('');
   }
   list.innerHTML = html;
 }
 
-// ─── TRUSTED VOICES ───────────────────────────────────────────────────────
+// ─── TRUSTED VOICES ──────────────────────────────────────────────────────────
 async function saveVoice() {
-  const name = document.getElementById('tv-name').value;
+  const name = document.getElementById('tv-name').value.trim();
   if (!name) return;
   const payload = { name, expertise: document.getElementById('tv-expertise').value, talking_points: document.getElementById('tv-points').value, active: true };
   try {
     const res = await fetch('/api/trusted-voices', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-    if (res.ok) { const saved = await res.json(); data.voices.push({ ...saved, points: saved.talking_points }); }
-    else { data.voices.push({ ...payload, id: Date.now(), points: payload.talking_points }); }
-  } catch(e) { data.voices.push({ ...payload, id: Date.now(), points: payload.talking_points }); }
+    if (res.ok) { const saved = await res.json(); data.voices.push(saved); }
+    else data.voices.push({ ...payload, id: Date.now() });
+  } catch(e) { data.voices.push({ ...payload, id: Date.now() }); }
   saveData(); renderVoices(); showConfirm('tv-confirm');
   ['tv-name','tv-expertise','tv-points'].forEach(id => document.getElementById(id).value = '');
 }
@@ -853,431 +919,203 @@ async function deleteVoice(id) {
 
 function renderVoices() {
   const list = document.getElementById('voice-list');
-  const active = data.voices.filter(v => v.active).length;
-  document.getElementById('gen-voices-count').textContent = active + ' active';
-  if (!data.voices.length) { list.innerHTML = '<div class="empty-state">No voices added yet</div>'; return; }
-  list.innerHTML = data.voices.map(v => `<div class="voice-item">
-    <div class="voice-info">
-      <div class="voice-name">${v.name}</div>
-      ${v.expertise ? `<div class="voice-expertise">${v.expertise}</div>` : ''}
-      ${v.points ? `<div class="voice-points">${v.points}</div>` : ''}
+  const active = data.voices.filter(v => v.active !== false).length;
+  document.getElementById('gen-voices') && (document.getElementById('gen-voices').textContent = active + ' active');
+  if (!data.voices.length) { list.innerHTML = '<div class="empty">No voices added yet</div>'; return; }
+  list.innerHTML = data.voices.map(v => `<div class="list-item">
+    <div class="list-item-body">
+      <div class="list-item-title">${v.name}</div>
+      ${v.expertise ? `<div class="list-item-sub" style="color:var(--orange);">${v.expertise}</div>` : ''}
+      ${v.talking_points||v.points ? `<div class="list-item-note">${v.talking_points||v.points}</div>` : ''}
     </div>
-    <div style="display:flex;gap:6px;">
-      <button class="voice-toggle ${v.active?'active':''}" onclick="toggleVoice('${v.id}')">${v.active?'Active':'Off'}</button>
-      <button class="btn btn-gray" onclick="deleteVoice('${v.id}')" style="font-size:8px;padding:6px 10px;">Delete</button>
+    <div class="item-actions">
+      <button onclick="toggleVoice('${v.id}')" style="font-family:'Space Mono',monospace;font-size:8px;letter-spacing:0.08em;text-transform:uppercase;padding:4px 10px;border-radius:4px;border:1px solid ${v.active!==false?'var(--green)':'var(--border-dark)'};background:${v.active!==false?'var(--green-dim)':'transparent'};color:${v.active!==false?'var(--green)':'var(--text-muted)'};cursor:pointer;">${v.active!==false?'Active':'Inactive'}</button>
+      <button class="btn btn-gray btn-sm" onclick="deleteVoice('${v.id}')">Delete</button>
     </div>
   </div>`).join('');
 }
 
-// ─── WEEKLY GENERATOR ─────────────────────────────────────────────────────
-
-async function runGenerator() {
-  const btn = document.getElementById('gen-btn');
-  const loading = document.getElementById('gen-loading');
-  const loadingText = document.getElementById('gen-loading-text');
-  const results = document.getElementById('gen-results');
-
-  btn.disabled = true;
-  loading.classList.add('visible');
-  results.innerHTML = '';
-
-  const steps = [
-    'Reading topic bank and content history...',
-    'Loading trusted voices and brand voice...',
-    'Generating carousel concepts...',
-    'Building slide copy and captions...',
-    'Almost done...'
-  ];
-  let step = 0;
-  const stepInterval = setInterval(() => { if (step < steps.length - 1) loadingText.textContent = steps[++step]; }, 2000);
-
-  try {
-    const response = await fetch('/api/generate', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({})
-    });
-
-    clearInterval(stepInterval);
-
-    if (!response.ok) {
-      const err = await response.json().catch(() => ({}));
-      throw new Error(err.error || 'Generator request failed');
-    }
-
-    const resData = await response.json();
-
-    loading.classList.remove('visible');
-    btn.disabled = false;
-
-    data.lastGenerated = new Date().toISOString();
-    document.getElementById('gen-last-run').textContent = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
-
-    // Refresh topics/carousels from backend so counts update
-    await loadFromBackend();
-    renderTopicBank();
-    renderGenerator();
-
-    renderGeneratedConcepts(resData.carousels);
-
-  } catch(err) {
-    clearInterval(stepInterval);
-    loading.classList.remove('visible');
-    btn.disabled = false;
-    results.innerHTML = `<div class="form-card" style="border-color:var(--orange);">
-      <div class="form-title">Generation failed</div>
-      <div style="font-size:13px;font-weight:300;color:var(--gray-muted);line-height:1.6;">Something went wrong: ${err.message}. Check that the backend is deployed with the correct environment variables.</div>
-    </div>`;
-  }
+// ─── PERFORMANCE & POSTS ─────────────────────────────────────────────────────
+function updatePostStat(id, field, val) {
+  const post = data.posts.find(p => String(p.id) === String(id));
+  if (!post) return;
+  post[field] = parseInt(val) || 0;
+  saveData();
+  renderOverview();
 }
 
-function renderGeneratedConcepts(carousels) {
-  generatedConcepts = carousels || [];
-  const results = document.getElementById('gen-results');
-  results.innerHTML = carousels.map((c, i) => `
-    <div class="carousel-concept" id="concept-${i}">
-      <div class="concept-header">
-        <div>
-          <div class="concept-num">Concept ${i+1} of 3</div>
-          <div class="concept-topic">${c.topic}</div>
-          <div style="margin-top:4px;font-size:12px;font-weight:300;color:var(--gray-muted);">${c.angle}</div>
-        </div>
-        <div style="display:flex;align-items:center;gap:8px;">
-          <span class="tag-pill ${categoryColors[c.pillar?.toLowerCase().replace(' ','-')]||'tag-gray'}">${c.pillar}</span>
-          <div class="concept-actions" id="actions-${i}">
-            <button class="btn" onclick="approveConcept(${i})">Approve + Generate Slides</button>
-            <button class="btn btn-ghost">Skip</button>
-          </div>
-        </div>
+function deletePost(id) {
+  data.posts = data.posts.filter(p => String(p.id) !== String(id));
+  saveData();
+  renderPerformance();
+  renderOverview();
+}
+
+function renderPerformance() {
+  const posts = data.posts;
+  document.getElementById('perf-posts').textContent = posts.length;
+  document.getElementById('perf-stories').textContent = posts.filter(p => p.stories).length;
+  const weekAgo = new Date(); weekAgo.setDate(weekAgo.getDate() - 7);
+  document.getElementById('perf-week').textContent = posts.filter(p => new Date(p.date) >= weekAgo).length;
+  const bestSaves = posts.length ? Math.max(...posts.map(p => p.saves||0)) : 0;
+  document.getElementById('perf-best-saves').textContent = bestSaves || '—';
+  if (posts.length > 1) {
+    const dates = posts.map(p => new Date(p.date)).sort((a,b) => a-b);
+    const weeks = Math.max(1, Math.ceil((dates[dates.length-1] - dates[0]) / (7*86400000)));
+    document.getElementById('perf-avg').textContent = (posts.length / weeks).toFixed(1);
+  } else { document.getElementById('perf-avg').textContent = '—'; }
+  const engRates = posts.filter(p => p.followers > 0).map(p => ((p.likes||0)+(p.saves||0)) / p.followers * 100);
+  document.getElementById('perf-eng').textContent = engRates.length ? (engRates.reduce((a,b)=>a+b,0)/engRates.length).toFixed(1)+'%' : '—%';
+  const listEl = document.getElementById('perf-posts-list');
+  if (!posts.length) { listEl.innerHTML = '<div class="empty">No posts logged yet — mark posts as posted from the Post Queue</div>'; return; }
+  listEl.innerHTML = posts.map(p => `<div class="post-item">
+    <div class="post-item-head">
+      <div>
+        <div class="post-topic">${p.topic}</div>
+        <div class="post-date">${p.date} · ${pillarTag(p.pillar)} ${p.stories?'<span class="tag tag-blue">+ Stories</span>':''}</div>
       </div>
-      <div class="concept-body">
-        <div class="concept-section-label">Slide copy</div>
-        <div class="slides-preview">
-          ${c.slides.map(s => `<div class="slide-preview-item">
-            <div class="slide-preview-tag">${s.tag} — ${s.type}</div>
-            <div class="slide-preview-text">${s.content}</div>
-          </div>`).join('')}
-        </div>
-        <div class="concept-section-label">Post caption</div>
-        <div class="concept-caption">${c.caption}</div>
-        <div class="concept-section-label">Hashtags (first comment)</div>
-        <div class="concept-hashtags">${c.hashtags}</div>
+      <button class="btn btn-gray btn-sm" onclick="deletePost('${p.id}')">Remove</button>
+    </div>
+    <div class="stats-row">
+      ${['likes','saves','comments','shares','newFollowers','reach'].map(f => `
+        <div class="stat-input-group">
+          <div class="stat-input-label">${f === 'newFollowers' ? 'New followers' : f.charAt(0).toUpperCase()+f.slice(1)}</div>
+          <input type="number" class="stat-input" value="${p[f]||0}" onchange="updatePostStat('${p.id}','${f}',this.value)" onblur="updatePostStat('${p.id}','${f}',this.value)">
+        </div>`).join('')}
+      <div class="stat-input-group">
+        <div class="stat-input-label">Followers</div>
+        <input type="number" class="stat-input" value="${p.followers||0}" onchange="updatePostStat('${p.id}','followers',this.value)" onblur="updatePostStat('${p.id}','followers',this.value)">
       </div>
     </div>
-  `).join('');
+  </div>`).join('');
 }
 
-async function approveConcept(idx) {
-  const concept = generatedConcepts[idx];
-  if (!concept) return;
-
-  const actionsEl = document.getElementById(`actions-${idx}`);
-  actionsEl.innerHTML = '<div class="approved-badge">Approved — generating slides...</div>';
-
-  // Update status in carousel_log to approved
-  if (concept.id) {
-    try {
-      await fetch('/api/carousel-log', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: concept.id, status: 'approved' })
-      });
-      const local = data.carousels.find(c => String(c.id) === String(concept.id));
-      if (local) local.status = 'approved';
-    } catch(e) { console.warn('Failed to update carousel status:', e); }
-  } else {
-    // Fallback: log locally if backend save failed
-    data.carousels.unshift({ id: Date.now(), date: new Date().toISOString().split('T')[0], topic: concept.topic, pillar: concept.pillar, status: 'approved', caption: concept.caption, hashtags: concept.hashtags });
+// ─── CALENDAR ─────────────────────────────────────────────────────────────────
+function renderCalendar() {
+  const now = new Date(); const year = now.getFullYear(); const month = now.getMonth();
+  const days = new Date(year, month+1, 0).getDate();
+  const firstDay = new Date(year, month, 1).getDay();
+  document.getElementById('cal-month-label').textContent = now.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  document.getElementById('cal-day-labels').innerHTML = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map(d => `<div class="cal-label">${d}</div>`).join('');
+  let html = Array(firstDay).fill(`<div style="min-height:64px;"></div>`).join('');
+  for (let d = 1; d <= days; d++) {
+    const ds = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const posts = data.posts.filter(p => p.date === ds);
+    const isToday = d === now.getDate();
+    html += `<div class="cal-day ${posts.length?'has-post':''} ${isToday?'today':''}">
+      <div class="cal-date">${d}</div>
+      ${posts.map(p => `<div class="cal-entry">${(p.topic||'').substring(0,16)}${(p.topic||'').length>16?'…':''}</div>`).join('')}
+    </div>`;
   }
-
-  saveData();
-  renderGeneratorHistory();
-
-  // Generate PNGs via API call back to this page's slide generator
-  try {
-    await generateAndDownloadSlides(concept);
-    actionsEl.innerHTML = `<div class="approved-badge">Slides downloaded</div>`;
-    document.getElementById(`concept-${idx}`).querySelector('.download-section')?.remove();
-    const conceptEl = document.getElementById(`concept-${idx}`);
-    conceptEl.insertAdjacentHTML('beforeend', `
-      <div class="download-section">
-        <div class="approved-badge">Slides ready</div>
-        <div style="font-size:12px;font-weight:300;color:var(--gray-muted);">PNG files downloaded to your computer — upload to Instagram in order</div>
-      </div>
-    `);
-  } catch(e) {
-    actionsEl.innerHTML = `<div style="font-family:'Space Mono',monospace;font-size:9px;color:var(--orange);">Slide generation requires page reload — refresh and try again</div>`;
-  }
+  document.getElementById('cal-grid').innerHTML = html;
+  const monthPosts = data.posts.filter(p => { const d = new Date(p.date); return d.getMonth() === month && d.getFullYear() === year; });
+  const calBody = document.getElementById('cal-posts-body');
+  if (!monthPosts.length) { calBody.innerHTML = '<tr><td colspan="6" class="empty">No posts this month</td></tr>'; return; }
+  calBody.innerHTML = monthPosts.map(p => `<tr>
+    <td style="font-family:'Space Mono',monospace;font-size:11px;">${p.date}</td>
+    <td>${p.topic}</td>
+    <td>${pillarTag(p.pillar)}</td>
+    <td>${p.saves||0}</td>
+    <td>${p.likes||0}</td>
+    <td>${p.reach||0}</td>
+  </tr>`).join('');
 }
 
-async function generateAndDownloadSlides(concept) {
-  // Build slides as canvas elements and download as PNGs
-  for (let i = 0; i < concept.slides.length; i++) {
-    const slide = concept.slides[i];
-    const filename = `${concept.topic.replace(/[^a-zA-Z0-9]/g,'_')}_S${String(i+1).padStart(2,'0')}.png`;
-    await downloadSlideAsPNG(slide, filename, i+1, concept.slides.length, concept.topic);
-    await new Promise(r => setTimeout(r, 300));
-  }
-}
+// ─── OVERVIEW ─────────────────────────────────────────────────────────────────
+function renderOverview() {
+  const posts = data.posts;
+  document.getElementById('ov-posts').textContent = posts.length;
+  document.getElementById('ov-saves').textContent = posts.reduce((a,p) => a+(p.saves||0), 0).toLocaleString();
+  document.getElementById('ov-topics').textContent = data.topics.filter(t => t.status === 'pending').length;
+  document.getElementById('ov-questions').textContent = data.questions.length;
+  const engRates = posts.filter(p => p.followers > 0).map(p => ((p.likes||0)+(p.saves||0)) / p.followers * 100);
+  document.getElementById('ov-eng').textContent = engRates.length ? (engRates.reduce((a,b)=>a+b,0)/engRates.length).toFixed(1)+'%' : '—%';
 
-async function downloadSlideAsPNG(slide, filename, num, total, topic) {
-  return new Promise((resolve) => {
-    const canvas = document.createElement('canvas');
-    canvas.width = 1080; canvas.height = 1350;
-    const ctx = canvas.getContext('2d');
+  // Charts
+  if (window._chartSaves) window._chartSaves.destroy();
+  if (window._chartPillars) window._chartPillars.destroy();
+  const recent = [...posts].slice(0, 10).reverse();
+  const sCtx = document.getElementById('chart-saves').getContext('2d');
+  window._chartSaves = new Chart(sCtx, { type:'bar', data:{ labels: recent.length ? recent.map(p => (p.topic||'').substring(0,12)+'…') : ['No posts yet'], datasets:[{ data: recent.length ? recent.map(p => p.saves||0) : [0], backgroundColor:'rgba(224,90,43,0.7)', borderColor:'#E05A2B', borderWidth:1, borderRadius:3 }]}, options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{ x:{grid:{color:'rgba(0,0,0,0.05)'},ticks:{color:'#9A9890',font:{family:'monospace',size:8}}}, y:{grid:{color:'rgba(0,0,0,0.05)'},ticks:{color:'#9A9890',font:{family:'monospace',size:8}}} } }});
+  const pillarCounts = {};
+  posts.forEach(p => { const k = p.pillar||'other'; pillarCounts[k] = (pillarCounts[k]||0)+1; });
+  const pCtx = document.getElementById('chart-pillars').getContext('2d');
+  window._chartPillars = new Chart(pCtx, { type:'doughnut', data:{ labels: Object.keys(pillarCounts).length ? Object.keys(pillarCounts) : ['No posts yet'], datasets:[{ data: Object.values(pillarCounts).length ? Object.values(pillarCounts) : [1], backgroundColor:['#E05A2B','#4A87C5','#3A9E6B','#9A9890','#E05A2B','#4A87C5'], borderWidth:0 }]}, options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ display:true, position:'right', labels:{ color:'#5A5A56', font:{family:'monospace',size:8}, boxWidth:10, padding:8 } } } }});
 
-    const bgColors = { hook: '#0D0D0B', myth: '#F5F2EA', reality: '#0D0D0B', list: '#F5F2EA', close: '#E05A2B' };
-    ctx.fillStyle = bgColors[slide.type] || '#0D0D0B';
-    ctx.fillRect(0, 0, 1080, 1350);
-
-    // Tag
-    const tagBg = { hook:'#E05A2B', myth:'#0D0D0B', reality:'#F5F2EA', list:'#0D0D0B', close:'#0D0D0B' };
-    const tagText = { hook:'#0D0D0B', myth:'#F5F2EA', reality:'#0D0D0B', list:'#F5F2EA', close:'#F5F2EA' };
-    ctx.fillStyle = tagBg[slide.type];
-    ctx.font = 'bold 24px monospace';
-    const tagW = ctx.measureText(slide.tag.toUpperCase()).width + 48;
-    ctx.fillRect(108, 108, tagW, 52);
-    ctx.fillStyle = tagText[slide.type];
-    ctx.fillText(slide.tag.toUpperCase(), 132, 142);
-
-    // Rule line
-    if (slide.type !== 'hook' && slide.type !== 'close') {
-      ctx.fillStyle = slide.type === 'reality' ? '#E05A2B' : '#0D0D0B';
-      ctx.fillRect(108, 196, 864, 6);
-    }
-
-    // Content text
-    const textColors = { hook: '#F0EDE4', myth: '#2A2A26', reality: '#9A9890', list: '#2A2A26', close: '#0D0D0B' };
-    ctx.fillStyle = textColors[slide.type];
-
-    if (slide.type === 'hook') {
-      ctx.font = 'bold 110px sans-serif';
-      const lines = slide.content.split('\n');
-      let y = 480;
-      lines.forEach(line => { ctx.fillText(line, 108, y); y += 120; });
-    } else if (slide.type === 'close') {
-      ctx.font = 'bold 26px sans-serif';
-      ctx.fillStyle = '#0D0D0B';
-      ctx.fillText('FREE OF UGLY.', 108, 160);
-      ctx.font = 'bold 72px sans-serif';
-      const closeLines = wrapText(ctx, slide.content, 864, 72);
-      let y = 400;
-      closeLines.forEach(line => { ctx.fillText(line, 108, y); y += 90; });
-      ctx.fillStyle = 'rgba(0,0,0,0.35)';
-      ctx.fillRect(108, 1100, 864, 3);
-      ctx.font = '22px monospace';
-      ctx.fillStyle = 'rgba(0,0,0,0.35)';
-      ctx.fillText('LINK IN BIO', 108, 1145);
-      ctx.font = '300 30px sans-serif';
-      ctx.fillStyle = '#0D0D0B';
-      const ctaLines = wrapText(ctx, slide.cta || '', 864, 30);
-      let cy = 1185;
-      ctaLines.forEach(line => { ctx.fillText(line, 108, cy); cy += 40; });
-    } else {
-      ctx.font = '300 40px sans-serif';
-      const content = slide.type === 'list' ? slide.content.split(',').map((s,i) => `→  ${s.trim()}`).join('\n') : slide.content;
-      const lines = wrapText(ctx, content, 864, 40);
-      let y = 320;
-      lines.forEach(line => {
-        if (line.startsWith('→') && slide.type === 'list') ctx.fillStyle = '#2A2A26';
-        ctx.fillText(line, 108, y); y += 56;
-      });
-    }
-
-    // Bottom bar
-    ctx.font = '20px monospace';
-    ctx.fillStyle = slide.type === 'myth' || slide.type === 'list' ? '#9A9890' : '#333330';
-    ctx.fillText('FREE OF UGLY', 108, 1280);
-    ctx.textAlign = 'right';
-    ctx.fillStyle = slide.type === 'reality' ? '#E05A2B' : (slide.type === 'myth' || slide.type === 'list' ? '#CCCAC0' : '#2A2A26');
-    ctx.fillText(`${String(num).padStart(2,'0')} / ${String(total).padStart(2,'0')}`, 972, 1280);
-    ctx.textAlign = 'left';
-
-    canvas.toBlob(blob => {
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url; a.download = filename; a.click();
-      URL.revokeObjectURL(url);
-      resolve();
-    }, 'image/png');
-  });
-}
-
-function wrapText(ctx, text, maxWidth, fontSize) {
-  const words = text.split(' '); const lines = []; let line = '';
-  words.forEach(word => {
-    const test = line + (line ? ' ' : '') + word;
-    if (ctx.measureText(test).width > maxWidth && line) { lines.push(line); line = word; }
-    else line = test;
-  });
-  if (line) lines.push(line);
-  return lines;
-}
-
-function renderGenerator() {
-  document.getElementById('gen-topics-count').textContent = data.topics.filter(t => t.status === 'pending').length + ' pending';
-  document.getElementById('gen-carousel-count').textContent = data.carousels.length + ' total';
-  document.getElementById('gen-voices-count').textContent = data.voices.filter(v => v.active).length + ' active';
-  document.getElementById('gen-last-run').textContent = data.lastGenerated ? new Date(data.lastGenerated).toLocaleDateString('en-US',{month:'short',day:'numeric'}) : 'Never';
-  renderGeneratorHistory();
-}
-
-function renderGeneratorHistory() {
-  const tbody = document.getElementById('gen-history-body');
-  if (!data.carousels.length) { tbody.innerHTML = '<tr><td colspan="5" class="empty-state">No carousels generated yet</td></tr>'; return; }
-  const statusColors = { generated:'tag-blue', approved:'tag-orange', posted:'tag-green' };
-  tbody.innerHTML = data.carousels.map(c => {
-    const dateStr = c.date_created ? new Date(c.date_created).toISOString().split('T')[0] : (c.date || '—');
-    const markBtn = c.status === 'approved'
-      ? `<button class="btn btn-green" onclick="markPosted('${c.id}')" style="font-size:8px;padding:5px 10px;">Mark Posted</button>`
-      : '';
+  // Top posts table
+  const topPosts = [...posts].sort((a,b) => (b.saves||0)-(a.saves||0)).slice(0,5);
+  const topBody = document.getElementById('top-posts-body');
+  if (!topPosts.length) { topBody.innerHTML = '<tr><td colspan="6" class="empty">No posts logged yet</td></tr>'; return; }
+  topBody.innerHTML = topPosts.map(p => {
+    const eng = p.followers > 0 ? (((p.likes||0)+(p.saves||0))/p.followers*100).toFixed(1)+'%' : '—';
     return `<tr>
-      <td style="font-family:'Space Mono',monospace;font-size:11px;">${dateStr}</td>
-      <td>${c.topic || '—'}</td>
-      <td><span class="tag-pill ${categoryColors[c.pillar?.toLowerCase().replace(/ /g,'-')]||'tag-gray'}">${c.pillar||'—'}</span></td>
-      <td><span class="tag-pill ${statusColors[c.status]||'tag-gray'}">${c.status}</span></td>
-      <td>${markBtn}</td>
+      <td><strong>${p.topic}</strong></td>
+      <td style="font-family:monospace;font-size:11px;">${p.date}</td>
+      <td style="color:var(--green);font-weight:600;">${p.saves||0}</td>
+      <td>${p.likes||0}</td>
+      <td>${p.reach||0}</td>
+      <td>${eng}</td>
     </tr>`;
   }).join('');
 }
 
-// ─── QUESTIONS ────────────────────────────────────────────────────────────
-function saveQuestion() {
-  const q = { text: document.getElementById('q-text').value, category: document.getElementById('q-category').value, date: document.getElementById('q-date').value || new Date().toISOString().split('T')[0], time: new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'}) };
-  if (!q.text) return;
-  data.questions.unshift(q); saveData(); renderQuestions(); showConfirm('q-confirm');
-  document.getElementById('q-text').value = '';
-}
-
+// ─── QUESTIONS ────────────────────────────────────────────────────────────────
 function renderQuestions() {
-  const total = data.questions.length; document.getElementById('q-total').textContent = total;
+  const qs = data.questions;
+  document.getElementById('q-total').textContent = qs.length;
   const weekAgo = new Date(); weekAgo.setDate(weekAgo.getDate()-7);
-  document.getElementById('q-week').textContent = data.questions.filter(q => new Date(q.date) >= weekAgo).length;
-  const cats = {}; data.questions.forEach(q => { cats[q.category] = (cats[q.category]||0)+1; });
+  document.getElementById('q-week').textContent = qs.filter(q => new Date(q.created_at||q.date) >= weekAgo).length;
+  const cats = {}; qs.forEach(q => { cats[q.category] = (cats[q.category]||0)+1; });
   const top = Object.entries(cats).sort((a,b) => b[1]-a[1])[0];
-  document.getElementById('q-top').textContent = top ? qCategoryLabels[top[0]] : '—';
-  const days = total ? Math.max(1, Math.ceil((new Date()-new Date(data.questions[total-1].date))/86400000)) : 1;
-  document.getElementById('q-avg').textContent = total ? (total/days).toFixed(1) : '—';
+  document.getElementById('q-top').textContent = top ? (Q_LABELS[top[0]]||top[0]) : '—';
+  const days = qs.length ? Math.max(1, Math.ceil((new Date()-new Date(qs[qs.length-1].created_at||qs[qs.length-1].date))/86400000)) : 1;
+  document.getElementById('q-avg').textContent = qs.length ? (qs.length/days).toFixed(1) : '—';
   const list = document.getElementById('q-list');
-  if (!total) { list.innerHTML = '<div class="empty-state">No questions yet. Muhammad\'s Supabase integration will auto-populate this.</div>'; return; }
-  list.innerHTML = data.questions.map(q => `<div class="q-item"><div class="q-time">${q.date}<br>${q.time}</div><div class="q-text">${q.text}</div><div><span class="tag-pill ${qColors[q.category]||'tag-gray'}">${qCategoryLabels[q.category]||q.category}</span></div></div>`).join('');
+  if (!qs.length) { list.innerHTML = '<div class="empty">No questions yet — they\'ll appear here automatically as people use Ask Anything</div>'; return; }
+  list.innerHTML = qs.map(q => `<div class="q-item">
+    <div class="q-time">${(q.date||'').toString().substring(0,10)}</div>
+    <div class="q-text">${q.text||q.content||''}</div>
+    <span class="tag tag-gray">${Q_LABELS[q.category]||q.category||'Other'}</span>
+  </div>`).join('');
 }
 
-// ─── SYSTEM PROMPT ────────────────────────────────────────────────────────
+// ─── BRAND VOICE ──────────────────────────────────────────────────────────────
 function savePrompt() { data.systemPrompt = document.getElementById('system-prompt-editor').value; saveData(); showConfirm('prompt-confirm'); }
 function resetPrompt() { data.systemPrompt = DEFAULT_PROMPT; document.getElementById('system-prompt-editor').value = DEFAULT_PROMPT; saveData(); }
-function addReference() {
-  const name = document.getElementById('ref-name').value; const detail = document.getElementById('ref-detail').value;
-  if (!name) return;
-  const current = document.getElementById('system-prompt-editor').value;
-  const addition = `\n- ${name}${detail?' — '+detail:''}`;
-  const insertPoint = current.indexOf('WHAT YOU NEVER DO:');
-  document.getElementById('system-prompt-editor').value = insertPoint > -1 ? current.slice(0,insertPoint-1)+addition+'\n'+current.slice(insertPoint) : current+addition;
-  data.systemPrompt = document.getElementById('system-prompt-editor').value;
-  saveData(); showConfirm('ref-confirm');
-  document.getElementById('ref-name').value = ''; document.getElementById('ref-detail').value = '';
-}
 
-// ─── OVERVIEW CHARTS ──────────────────────────────────────────────────────
-let chartInstances = {};
-function destroyChart(id) { if (chartInstances[id]) { chartInstances[id].destroy(); delete chartInstances[id]; } }
+// ─── DEFAULT PROMPT ───────────────────────────────────────────────────────────
+const DEFAULT_PROMPT = `You are the voice of Free of Ugly — a science-first men's health and wellness brand with a dry, intelligent, slightly confrontational tone. Your job is to give honest, evidence-based answers about men's skincare, supplements, health, biohacking, peptides, mental health, and wellness.
 
-function renderOverview() {
-  const followers = data.igWeeks.length ? data.igWeeks[data.igWeeks.length-1].followers : 0;
-  document.getElementById('stat-followers').textContent = followers ? followers.toLocaleString() : '—';
-  document.getElementById('stat-posts').textContent = data.posts.length;
-  document.getElementById('stat-questions').textContent = data.questions.length;
-  document.getElementById('stat-saves').textContent = data.posts.reduce((a,p) => a+p.saves, 0).toLocaleString();
-  document.getElementById('stat-topics').textContent = data.topics.filter(t => t.status==='pending').length;
-  const avgEng = data.posts.filter(p => p.engagement !== '—').map(p => parseFloat(p.engagement));
-  document.getElementById('stat-engagement').textContent = avgEng.length ? (avgEng.reduce((a,b) => a+b,0)/avgEng.length).toFixed(1)+'%' : '—%';
+BRAND VOICE:
+- Dry and witty — intelligence with an edge
+- You call out bad science and grift directly but without being preachy
+- You never shame the person asking — the enemy is bad information, not the person who believed it
+- Short, punchy sentences. No fluff. No hedging unless the science genuinely warrants it.
 
-  destroyChart('followers'); destroyChart('saves'); destroyChart('categories');
+CORE BELIEFS:
+- Looking good and feeling good are the same signal
+- Most men have been failed by an industry that ignores or exploits them
+- Science is the only honest filter
+- Vanity without shame is healthy — uninformed vanity is not
+- Self-neglect is not strength — it's just neglect
 
-  const fCtx = document.getElementById('chart-followers').getContext('2d');
-  chartInstances['followers'] = new Chart(fCtx, { type:'line', data:{ labels: data.igWeeks.length ? data.igWeeks.map(w=>w.date) : ['W1','W2','W3','W4'], datasets:[{ data: data.igWeeks.length ? data.igWeeks.map(w=>w.followers) : [0,0,0,0], borderColor:'#E05A2B', backgroundColor:'rgba(224,90,43,0.08)', borderWidth:2, pointBackgroundColor:'#E05A2B', pointRadius:4, fill:true, tension:0.3 }]}, options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{ x:{grid:{color:'rgba(42,42,38,0.8)'},ticks:{color:'#9A9890',font:{family:'Space Mono',size:9}}}, y:{grid:{color:'rgba(42,42,38,0.8)'},ticks:{color:'#9A9890',font:{family:'Space Mono',size:9}}} } }});
+WHAT YOU NEVER DO:
+- Recommend specific branded products
+- Make medical diagnoses or replace professional advice
+- Use excessive caveats that make the answer useless
+- Use corporate wellness language
 
-  const sCtx = document.getElementById('chart-saves').getContext('2d');
-  const recent = data.posts.slice(0,10).reverse();
-  chartInstances['saves'] = new Chart(sCtx, { type:'bar', data:{ labels: recent.length ? recent.map(p=>p.topic.substring(0,10)+'…') : ['P1','P2','P3'], datasets:[{ data: recent.length ? recent.map(p=>p.saves) : [0,0,0], backgroundColor:'rgba(76,175,125,0.6)', borderColor:'#4CAF7D', borderWidth:1, borderRadius:2 }]}, options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{ x:{grid:{color:'rgba(42,42,38,0.8)'},ticks:{color:'#9A9890',font:{family:'Space Mono',size:9}}}, y:{grid:{color:'rgba(42,42,38,0.8)'},ticks:{color:'#9A9890',font:{family:'Space Mono',size:9}}} } }});
+Remember: you're the person who read the study, checked the conflict of interest, and will tell someone plainly when something is real and when someone is getting paid to say it is.`;
 
-  const cats = {}; data.questions.forEach(q => { cats[q.category]=(cats[q.category]||0)+1; });
-  const cCtx = document.getElementById('chart-categories').getContext('2d');
-  chartInstances['categories'] = new Chart(cCtx, { type:'doughnut', data:{ labels: Object.keys(cats).length ? Object.keys(cats).map(k=>qCategoryLabels[k]) : ['Skincare','Supplements','Sleep','Other'], datasets:[{ data: Object.keys(cats).length ? Object.values(cats) : [0,0,0,0], backgroundColor:['#E05A2B','#5B9BD5','#4CAF7D','#9A9890','#E05A2B','#5B9BD5','#4CAF7D','#9A9890'], borderWidth:0 }]}, options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ display:true, position:'right', labels:{ color:'#9A9890', font:{family:'Space Mono',size:8}, boxWidth:10, padding:8 } } } }});
-}
-
-// ─── BACKEND SYNC ─────────────────────────────────────────────────────────
-async function loadFromBackend() {
-  try {
-    const [voicesRes, topicsRes, carouselsRes] = await Promise.all([
-      fetch('/api/trusted-voices'),
-      fetch('/api/topic-bank'),
-      fetch('/api/carousel-log')
-    ]);
-    if (voicesRes.ok) {
-      const voices = await voicesRes.json();
-      // Map talking_points → points for display compatibility
-      data.voices = voices.map(v => ({ ...v, points: v.talking_points || v.points }));
-    }
-    if (topicsRes.ok) { data.topics = await topicsRes.json(); }
-    if (carouselsRes.ok) { data.carousels = await carouselsRes.json(); }
-    backendAvailable = true;
-
-    const card = document.getElementById('backend-status-card');
-    if (card) card.style.display = 'none'; // connected — hide status card
-    return true;
-  } catch(e) {
-    backendAvailable = false;
-    const card = document.getElementById('backend-status-card');
-    if (card) {
-      card.style.display = 'block';
-      document.getElementById('backend-status-title').textContent = 'Backend not reachable — running on local data';
-      document.getElementById('backend-status-text').textContent = 'The generator and Supabase tables are not connected. Make sure the app is deployed with SUPABASE_URL, SUPABASE_SERVICE_KEY, and ANTHROPIC_API_KEY environment variables.';
-    }
-    return false;
-  }
-}
-
-async function markPosted(id) {
-  const today = new Date().toISOString().split('T')[0];
-  try {
-    await fetch('/api/carousel-log', {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id, status: 'posted', posted_date: today })
-    });
-    const c = data.carousels.find(c => String(c.id) === String(id));
-    if (c) { c.status = 'posted'; c.posted_date = today; }
-    saveData();
-    renderGeneratorHistory();
-  } catch(e) { console.error('Failed to mark as posted:', e); }
-}
-
-// ─── INIT ────────────────────────────────────────────────────────────────
+// ─── INIT ─────────────────────────────────────────────────────────────────────
 async function init() {
   loadData();
-  document.getElementById('today-date').textContent = new Date().toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
-  const today = new Date().toISOString().split('T')[0];
-  ['ig-date','post-date','cal-date','q-date'].forEach(id => { const el=document.getElementById(id); if(el) el.value=today; });
-
-  // Fetch live data from backend (topics, voices, carousels)
+  document.getElementById('today-date').textContent = new Date().toLocaleDateString('en-US', { weekday:'long', month:'long', day:'numeric', year:'numeric' });
+  document.getElementById('modal-date').value = new Date().toISOString().split('T')[0];
   await loadFromBackend();
-
-  // If backend returned no voices, fall back to seeded defaults locally
-  if (!data.voices.length) {
-    data.voices = [
-      { id: 1, name: 'Scott Galloway', expertise: 'Young men in crisis, masculinity, economic mobility', points: 'Male loneliness epidemic, no group has fallen further faster, aspirational masculinity', active: true },
-      { id: 2, name: 'Peter Attia', expertise: 'Longevity, metabolic health', points: 'Zone 2 cardio, VO2 max, ApoB, lifespan vs healthspan, strength training for longevity', active: true },
-      { id: 3, name: 'Rhonda Patrick', expertise: 'Micronutrients, cellular health', points: 'Omega 3s, Vitamin D, heat and cold exposure, magnesium, senescence', active: true }
-    ];
-    saveData();
-  }
-
   renderOverview();
-  renderCalendar();
-  renderTopicBank();
-  renderVoices();
-  renderGenerator();
+  renderGeneratorStats();
+  updateQueueBadge();
 }
 
 init();
