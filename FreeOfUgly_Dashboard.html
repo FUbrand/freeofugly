@@ -565,7 +565,28 @@ async function loadFromBackend() {
     ]);
     if (Array.isArray(tv) && tv.length) data.voices = tv;
     if (Array.isArray(tb)) data.topics = tb;
-    if (Array.isArray(cl)) data.carousels = cl;
+    if (Array.isArray(cl)) {
+      data.carousels = cl;
+      // Auto-populate queue from approved carousel_log entries that aren't already in queue
+      const approvedCarousels = cl.filter(c => c.status === 'approved');
+      approvedCarousels.forEach(c => {
+        if (!data.queue.find(q => String(q.id) === String(c.id))) {
+          data.queue.push({
+            id: c.id,
+            topic: c.topic,
+            pillar: c.pillar,
+            angle: '',
+            slides: c.slides_json || [],
+            caption: c.caption || '',
+            hashtags: c.hashtags || '',
+            stories: [],
+            claudePrompt: `CAROUSEL: ${c.topic}\nPILLAR: ${c.pillar}\n\n${c.slide_copy || ''}\n\nCAPTION:\n${c.caption || ''}\n\nHASHTAGS:\n${c.hashtags || ''}`,
+            approvedDate: c.date_created ? c.date_created.split('T')[0] : '—',
+            status: 'approved'
+          });
+        }
+      });
+    }
     if (Array.isArray(ql)) data.questions = ql;
     if (Array.isArray(pl) && pl.length) {
       // Map Supabase field names to dashboard field names
@@ -768,17 +789,41 @@ function skipConcept(idx) {
 
 function renderGeneratorHistory() {
   const tbody = document.getElementById('gen-history');
-  if (!data.carousels.length) { tbody.innerHTML = '<tr><td colspan="4" class="empty">No carousels generated yet</td></tr>'; return; }
   const statusColors = { generated:'tag-blue', approved:'tag-orange', posted:'tag-green' };
-  tbody.innerHTML = data.carousels.map(c => {
-    const date = c.date_created ? new Date(c.date_created).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : (c.date || '—');
-    return `<tr>
-      <td style="font-family:'Space Mono',monospace;font-size:11px;">${date}</td>
-      <td>${c.topic || '—'}</td>
-      <td>${pillarTag(c.pillar)}</td>
-      <td><span class="tag ${statusColors[c.status]||'tag-gray'}">${c.status}</span></td>
-    </tr>`;
-  }).join('');
+
+  // Combine carousel_log entries with posted entries from posts table
+  const fromCarousels = data.carousels.map(c => ({
+    date: c.date_created ? new Date(c.date_created).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '—',
+    sortDate: c.date_created || '',
+    topic: c.topic || '—',
+    pillar: c.pillar,
+    status: c.status || 'generated'
+  }));
+
+  const fromPosts = data.posts
+    .filter(p => !data.carousels.find(c => c.topic === p.topic))
+    .map(p => ({
+      date: p.date ? new Date(p.date + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '—',
+      sortDate: p.date || '',
+      topic: p.topic || '—',
+      pillar: p.pillar,
+      status: 'posted'
+    }));
+
+  const all = [...fromCarousels, ...fromPosts]
+    .sort((a, b) => new Date(b.sortDate) - new Date(a.sortDate));
+
+  if (!all.length) { tbody.innerHTML = '<tr><td colspan="4" class="empty">No carousels yet</td></tr>'; return; }
+
+  tbody.innerHTML = all.map(c => `<tr>
+    <td style="font-family:'Space Mono',monospace;font-size:11px;">${c.date}</td>
+    <td>${c.topic}</td>
+    <td>${pillarTag(c.pillar)}</td>
+    <td><span class="tag ${statusColors[c.status]||'tag-gray'}">${c.status}</span></td>
+  </tr>`).join('');
+
+  // Also update total count
+  document.getElementById('gen-total').textContent = all.length + ' total';
 }
 
 // ─── POST QUEUE ───────────────────────────────────────────────────────────────
@@ -1025,11 +1070,11 @@ function renderPerformance() {
   document.getElementById('perf-posts').textContent = posts.length;
   document.getElementById('perf-stories').textContent = posts.filter(p => p.stories).length;
   const weekAgo = new Date(); weekAgo.setDate(weekAgo.getDate() - 7);
-  document.getElementById('perf-week').textContent = posts.filter(p => new Date(p.date) >= weekAgo).length;
+  document.getElementById('perf-week').textContent = posts.filter(p => new Date(p.date + 'T12:00:00') >= weekAgo).length;
   const bestSaves = posts.length ? Math.max(...posts.map(p => p.saves||0)) : 0;
   document.getElementById('perf-best-saves').textContent = bestSaves || '—';
   if (posts.length > 1) {
-    const dates = posts.map(p => new Date(p.date)).sort((a,b) => a-b);
+    const dates = posts.map(p => new Date(p.date + 'T12:00:00')).sort((a,b) => a-b);
     const weeks = Math.max(1, Math.ceil((dates[dates.length-1] - dates[0]) / (7*86400000)));
     document.getElementById('perf-avg').textContent = (posts.length / weeks).toFixed(1);
   } else { document.getElementById('perf-avg').textContent = '—'; }
@@ -1077,7 +1122,7 @@ function renderCalendar() {
     </div>`;
   }
   document.getElementById('cal-grid').innerHTML = html;
-  const monthPosts = data.posts.filter(p => { const d = new Date(p.date); return d.getMonth() === month && d.getFullYear() === year; });
+  const monthPosts = data.posts.filter(p => { const d = new Date(p.date + 'T12:00:00'); return d.getMonth() === month && d.getFullYear() === year; });
   const calBody = document.getElementById('cal-posts-body');
   if (!monthPosts.length) { calBody.innerHTML = '<tr><td colspan="6" class="empty">No posts this month</td></tr>'; return; }
   calBody.innerHTML = monthPosts.map(p => `<tr>
