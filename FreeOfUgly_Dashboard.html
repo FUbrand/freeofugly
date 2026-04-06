@@ -611,9 +611,9 @@ function renderGeneratorStats() {
     ? new Date(data.lastGenerated).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
     : 'Never';
   renderGeneratorHistory();
-  // Render full concept cards for any generated/approved carousels that have slide data
+  // Only render concept cards for generated status — approved ones belong in queue
   const active = data.carousels.filter(c =>
-    (c.status === 'generated' || c.status === 'approved') &&
+    c.status === 'generated' &&
     c.slides_json && c.slides_json.length
   );
   if (active.length && !generatedConcepts.length) {
