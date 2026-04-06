@@ -567,13 +567,13 @@ async function loadFromBackend() {
     if (Array.isArray(tb)) data.topics = tb;
     if (Array.isArray(cl)) {
       data.carousels = cl;
-      // Auto-populate queue from approved carousel_log entries that aren't already in queue
-      const approvedCarousels = cl.filter(c => c.status === 'approved');
-      approvedCarousels.forEach(c => {
-        if (!data.queue.find(q => String(q.id) === String(c.id))) {
+      // Rebuild queue entirely from approved carousel_log entries — never from localStorage
+      data.queue = cl
+        .filter(c => c.status === 'approved')
+        .map(c => {
           const slides = c.slides_json || [];
           const stories = c.stories_json || [];
-          data.queue.push({
+          return {
             id: c.id,
             topic: c.topic,
             pillar: c.pillar,
@@ -585,16 +585,8 @@ async function loadFromBackend() {
             claudePrompt: buildClaudePromptFromData(c.topic, c.pillar, slides, c.caption, c.hashtags, stories),
             approvedDate: c.date_created ? c.date_created.split('T')[0] : '—',
             status: 'approved'
-          });
-        }
-      });
-      // Remove from queue any items that are now posted in carousel_log — match by ID or topic
-      const postedIds = cl.filter(c => c.status === 'posted').map(c => String(c.id));
-      const postedTopics = cl.filter(c => c.status === 'posted').map(c => c.topic?.toLowerCase());
-      data.queue = data.queue.filter(q => 
-        !postedIds.includes(String(q.id)) && 
-        !postedTopics.includes(q.topic?.toLowerCase())
-      );
+          };
+        });
     }
     if (Array.isArray(ql)) data.questions = ql;
     if (Array.isArray(pl) && pl.length) {
