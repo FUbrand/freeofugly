@@ -800,17 +800,37 @@ async function approveConcept(idx) {
     approvedDate: new Date().toISOString().split('T')[0],
     status: 'approved'
   };
+
+  // Update local carousel status so it doesn't re-render as generated
+  const localCarousel = data.carousels.find(car => String(car.id) === String(c.id));
+  if (localCarousel) localCarousel.status = 'approved';
+
+  // Remove from generatedConcepts so it doesn't re-render
+  generatedConcepts = generatedConcepts.filter((_, i) => i !== idx);
+
   data.queue = data.queue.filter(q => String(q.id) !== String(entry.id));
   data.queue.unshift(entry);
   saveData();
   updateQueueBadge();
+
   if (c.id) {
     try {
       await fetch('/api/carousel-log', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: c.id, status: 'approved' }) });
     } catch(e) {}
   }
+
   const actionsEl = document.getElementById(`actions-${idx}`);
   if (actionsEl) actionsEl.innerHTML = `<span class="tag tag-green">✓ Approved — check Post Queue</span>`;
+
+  // Re-render concept cards without the approved one
+  const remaining = data.carousels.filter(car =>
+    car.status === 'generated' && car.slides_json && car.slides_json.length
+  ).map(car => ({
+    id: car.id, topic: car.topic, pillar: car.pillar, angle: '',
+    slides: car.slides_json || [], caption: car.caption || '',
+    hashtags: car.hashtags || '', stories: car.stories_json || []
+  }));
+  if (remaining.length) renderGeneratedConcepts(remaining);
 }
 
 function skipConcept(idx) {
