@@ -571,21 +571,26 @@ async function loadFromBackend() {
       const approvedCarousels = cl.filter(c => c.status === 'approved');
       approvedCarousels.forEach(c => {
         if (!data.queue.find(q => String(q.id) === String(c.id))) {
+          const slides = c.slides_json || [];
+          const stories = c.stories_json || [];
           data.queue.push({
             id: c.id,
             topic: c.topic,
             pillar: c.pillar,
             angle: '',
-            slides: c.slides_json || [],
+            slides,
             caption: c.caption || '',
             hashtags: c.hashtags || '',
-            stories: [],
-            claudePrompt: `CAROUSEL: ${c.topic}\nPILLAR: ${c.pillar}\n\n${c.slide_copy || ''}\n\nCAPTION:\n${c.caption || ''}\n\nHASHTAGS:\n${c.hashtags || ''}`,
+            stories,
+            claudePrompt: buildClaudePromptFromData(c.topic, c.pillar, slides, c.caption, c.hashtags, stories),
             approvedDate: c.date_created ? c.date_created.split('T')[0] : '—',
             status: 'approved'
           });
         }
       });
+      // Remove from queue any items that are now posted in carousel_log
+      const postedIds = cl.filter(c => c.status === 'posted').map(c => String(c.id));
+      data.queue = data.queue.filter(q => !postedIds.includes(String(q.id)));
     }
     if (Array.isArray(ql)) data.questions = ql;
     if (Array.isArray(pl) && pl.length) {
@@ -610,6 +615,25 @@ function renderGeneratorStats() {
     ? new Date(data.lastGenerated).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
     : 'Never';
   renderGeneratorHistory();
+  // Render full concept cards for any generated/approved carousels that have slide data
+  const active = data.carousels.filter(c =>
+    (c.status === 'generated' || c.status === 'approved') &&
+    c.slides_json && c.slides_json.length
+  );
+  if (active.length && !generatedConcepts.length) {
+    const concepts = active.map(c => ({
+      id: c.id,
+      topic: c.topic,
+      pillar: c.pillar,
+      angle: '',
+      slides: c.slides_json || [],
+      caption: c.caption || '',
+      hashtags: c.hashtags || '',
+      stories: c.stories_json || [],
+      date_created: c.date_created
+    }));
+    renderGeneratedConcepts(concepts);
+  }
 }
 
 async function runGenerator() {
@@ -640,6 +664,21 @@ async function runGenerator() {
     btn.disabled = false;
     results.innerHTML = `<div class="card"><div class="card-body" style="color:var(--red);">Generation failed: ${err.message}</div></div>`;
   }
+}
+
+function buildClaudePromptFromData(topic, pillar, slides, caption, hashtags, stories) {
+  const slideText = (slides || []).map((s, i) => {
+    const labels = ['HOOK','MYTH','REALITY','LIST','REALITY 2','CLOSE'];
+    let line = `SLIDE ${i+1} — ${labels[i]||s.type?.toUpperCase()||''} [${s.tag||''}]\n${s.content||''}`;
+    if (s.cta) line += `\nCTA: ${s.cta}`;
+    return line;
+  }).join('\n\n');
+  const storyText = (stories || []).map((s, i) => {
+    let line = `Story Card ${i+1} — ${(s.type||'').toUpperCase()}\n${s.content||''}`;
+    if (s.options) line += `\nOptions: ${s.options.join(' / ')}`;
+    return line;
+  }).join('\n\n');
+  return `CAROUSEL: ${topic}\nPILLAR: ${pillar}\n\n${slideText}\n\nCAPTION:\n${caption||''}\n\nHASHTAGS:\n${hashtags||''}\n\nSTORY CARDS:\n${storyText}`;
 }
 
 function buildClaudePrompt(c) {
@@ -918,10 +957,14 @@ async function confirmMarkPosted() {
     });
   }
 
-  // Update carousel_log status if it has a real Supabase ID
-  if (item.id && String(item.id).length < 13) {
-    try { await fetch('/api/carousel-log', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: item.id, status: 'posted', posted_date: date }) }); } catch(e) {}
-  }
+  // Always update carousel_log status to posted so item stops re-appearing in queue
+  try {
+    await fetch('/api/carousel-log', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: item.id, status: 'posted', posted_date: date })
+    });
+  } catch(e) {}
 
   data.queue = data.queue.filter(q => String(q.id) !== String(id));
   saveData();
