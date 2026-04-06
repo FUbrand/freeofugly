@@ -588,9 +588,13 @@ async function loadFromBackend() {
           });
         }
       });
-      // Remove from queue any items that are now posted in carousel_log
+      // Remove from queue any items that are now posted in carousel_log — match by ID or topic
       const postedIds = cl.filter(c => c.status === 'posted').map(c => String(c.id));
-      data.queue = data.queue.filter(q => !postedIds.includes(String(q.id)));
+      const postedTopics = cl.filter(c => c.status === 'posted').map(c => c.topic?.toLowerCase());
+      data.queue = data.queue.filter(q => 
+        !postedIds.includes(String(q.id)) && 
+        !postedTopics.includes(q.topic?.toLowerCase())
+      );
     }
     if (Array.isArray(ql)) data.questions = ql;
     if (Array.isArray(pl) && pl.length) {
