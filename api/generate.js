@@ -162,6 +162,7 @@ module.exports = async function handler(req, res) {
           slides_json: carousel.slides || [],
           caption: carousel.caption,
           hashtags: carousel.hashtags,
+          stories_json: carousel.stories || [],
           status: "generated",
         })
         .select()
