@@ -612,9 +612,12 @@ function renderGeneratorStats() {
     : 'Never';
   renderGeneratorHistory();
   // Only render concept cards for generated status — approved ones belong in queue
+  // Exclude any concepts the user has already actioned this session
+  const dismissed = JSON.parse(localStorage.getItem('fou_dismissed') || '[]');
   const active = data.carousels.filter(c =>
     c.status === 'generated' &&
-    c.slides_json && c.slides_json.length
+    c.slides_json && c.slides_json.length &&
+    !dismissed.includes(String(c.id))
   );
   if (active.length && !generatedConcepts.length) {
     const concepts = active.map(c => ({
@@ -640,6 +643,8 @@ async function runGenerator() {
   btn.disabled = true;
   loading.classList.add('on');
   results.innerHTML = '';
+  generatedConcepts = [];
+  localStorage.removeItem('fou_dismissed');
   const steps = ['Reading topic bank and trusted voices...','Building carousel concepts...','Writing slide copy...','Generating story prompts...','Almost done...'];
   let step = 0;
   const interval = setInterval(() => { if (step < steps.length - 1) loadingText.textContent = steps[++step]; }, 2500);
@@ -801,7 +806,14 @@ async function approveConcept(idx) {
     status: 'approved'
   };
 
-  // Update local carousel status so it doesn't re-render as generated
+  // Track as dismissed so it doesn't re-render on page reload
+  if (c.id) {
+    const dismissed = JSON.parse(localStorage.getItem('fou_dismissed') || '[]');
+    if (!dismissed.includes(String(c.id))) dismissed.push(String(c.id));
+    localStorage.setItem('fou_dismissed', JSON.stringify(dismissed));
+  }
+
+  // Update local carousel status
   const localCarousel = data.carousels.find(car => String(car.id) === String(c.id));
   if (localCarousel) localCarousel.status = 'approved';
 
@@ -834,10 +846,15 @@ async function approveConcept(idx) {
 }
 
 function skipConcept(idx) {
+  const c = generatedConcepts[idx];
+  if (c && c.id) {
+    const dismissed = JSON.parse(localStorage.getItem('fou_dismissed') || '[]');
+    if (!dismissed.includes(String(c.id))) dismissed.push(String(c.id));
+    localStorage.setItem('fou_dismissed', JSON.stringify(dismissed));
+  }
+  generatedConcepts = generatedConcepts.filter((_, i) => i !== idx);
   const el = document.getElementById(`concept-${idx}`);
-  if (el) { el.style.opacity = '0.4'; el.style.pointerEvents = 'none'; }
-  const actionsEl = document.getElementById(`actions-${idx}`);
-  if (actionsEl) actionsEl.innerHTML = `<span class="tag tag-gray">Skipped</span>`;
+  if (el) el.remove();
 }
 
 function renderGeneratorHistory() {
