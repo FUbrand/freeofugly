@@ -74,27 +74,39 @@ STORY CARDS — 3 cards that run over 2-3 days after the carousel posts:
 - Card 3 (Question sticker): An open question that invites personal responses. Should feel like the natural conversation starter after someone has absorbed the carousel.
 
 SLIDE STRUCTURE:
-CAROUSEL SWIPE MECHANICS — this is the priority:
-Instagram users decide whether to swipe within 2 seconds of landing on slide 1. Every slide transition must create a reason to keep going. If slide 2 feels like a step down in energy from slide 1, people stop.
+1. HOOK (dark slide): Bold provocative statement. One idea. No hedging.
+2. MYTH (light slide): The common belief stated fairly.
+3. REALITY (dark slide): The science. Specific numbers, mechanisms.
+4. LIST (light slide): 4 practical specific actionable items.
+5. REALITY 2 (dark slide): The bigger implication.
+6. CLOSE (orange slide): Brand voice sign-off. Dry, confident, one line.
 
-SLIDE TRANSITION RULES:
-- Slide 1 → 2: The hook makes a claim. Slide 2 must make them feel the problem personally before explaining it. Not "here is the myth" — "here is what you believed and why it made sense."
-- Slide 2 → 3: The myth is stated. Slide 3 must land like a reveal. Lead with the most surprising number or mechanism first — not last.
-- Slide 3 → 4: The science is delivered. Slide 4 list must feel like the payoff — specific, actionable, things they didn't know before.
-- Slide 4 → 5: The list is done. Slide 5 must zoom out to the bigger implication — why this matters beyond the individual. Make it feel consequential.
-- Slide 5 → 6: The implication lands. Slide 6 close must be the sharpest single line in the carousel. The one they screenshot.
-
-SLIDE STRUCTURE:
-1. HOOK (dark slide): One claim. Stops the scroll. Reads like a fact, lands like a gut punch. Must make someone want to know if it's true.
-2. MYTH (light slide): Make the audience feel the problem personally. Not just "here is the belief" — "here is why you believed it and what it cost you."
-3. REALITY (dark slide): Lead with the most surprising number or mechanism. Front-load the revelation.
-4. LIST (light slide): The payoff. 4 specific things they didn't know. Actionable enough to screenshot.
-5. REALITY 2 (dark slide): The bigger consequence. Why this matters beyond just them. Zoom out.
-6. CLOSE (orange slide): The sharpest line in the carousel. Dry, confident, quotable. The one that gets screenshotted.
+Return EXACTLY this JSON structure:
+{
+  "carousels": [
+    {
+      "topic": "Short topic name",
+      "pillar": "pillar name",
+      "angle": "One sentence on the unique angle",
+      "slides": [
+        {"tag": "tag text", "type": "hook", "content": "slide copy"},
+        {"tag": "tag text", "type": "myth", "content": "slide copy"},
+        {"tag": "tag text", "type": "reality", "content": "slide copy"},
+        {"tag": "tag text", "type": "list", "content": "item one, item two, item three, item four"},
+        {"tag": "tag text", "type": "reality", "content": "slide copy"},
+        {"tag": "Free of Ugly.", "type": "close", "content": "closing statement", "cta": "link in bio CTA text"}
+      ],
+      "caption": "Full Instagram caption ending with: Ask anything — link in bio.",
+      "hashtags": "15 relevant hashtags space separated",
+      "stories": [
+        {"type": "poll", "content": "Poll question text", "options": ["Option A", "Option B"]},
+        {"type": "statement", "content": "Bold reframe statement. Check the post in our feed."},
+        {"type": "question", "content": "Open question for question sticker"}
       ]
     }
   ]
 }
+
 Return ONLY the JSON. No preamble, no explanation, no markdown code blocks. Pure JSON only.`;
 }
 
@@ -130,7 +142,7 @@ module.exports = async function handler(req, res) {
         "anthropic-version": "2023-06-01",
       },
       body: JSON.stringify({
-        model: "claude-sonnet-4-20250514",
+        model: "claude-sonnet-4-6",
         max_tokens: 4000,
         system: systemPrompt,
         messages: [{ role: "user", content: "Generate this week's 3 carousel concepts for Free of Ugly. Return only JSON." }],
@@ -190,3 +202,4 @@ module.exports = async function handler(req, res) {
     return res.status(500).json({ error: "Internal server error" });
   }
 };
+
