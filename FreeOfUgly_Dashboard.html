@@ -604,6 +604,7 @@ async function loadFromBackend() {
 let generatedConcepts = [];
 
 function renderGeneratorStats() {
+  checkPendingGeneration();
   document.getElementById('gen-topics').textContent = data.topics.filter(t => t.status === 'pending').length + ' pending';
   document.getElementById('gen-voices').textContent = data.voices.filter(v => v.active !== false).length + ' active';
   document.getElementById('gen-total').textContent = data.carousels.length + ' total';
@@ -635,35 +636,107 @@ function renderGeneratorStats() {
   }
 }
 
+// Background-safe generator — navigate away freely
+let _generatorRunning = false;
+
 async function runGenerator() {
+  if (_generatorRunning) return;
+  _generatorRunning = true;
+  localStorage.setItem('fou_generating', Date.now().toString());
+  localStorage.removeItem('fou_gen_result');
+  localStorage.removeItem('fou_dismissed');
+
   const btn = document.getElementById('gen-btn');
   const loading = document.getElementById('gen-loading');
-  const loadingText = document.getElementById('gen-loading-text');
   const results = document.getElementById('gen-results');
-  btn.disabled = true;
-  loading.classList.add('on');
-  results.innerHTML = '';
+  if (btn) btn.disabled = true;
+  if (loading) loading.classList.add('on');
+  if (results) results.innerHTML = '';
   generatedConcepts = [];
-  localStorage.removeItem('fou_dismissed');
+
   const steps = ['Reading topic bank and trusted voices...','Building carousel concepts...','Writing slide copy...','Generating story prompts...','Almost done...'];
   let step = 0;
-  const interval = setInterval(() => { if (step < steps.length - 1) loadingText.textContent = steps[++step]; }, 2500);
+  const interval = setInterval(() => {
+    if (step < steps.length - 1) {
+      step++;
+      const lt = document.getElementById('gen-loading-text');
+      if (lt) lt.textContent = steps[step];
+    }
+  }, 2500);
+
   try {
     const res = await fetch('/api/generate', { method: 'POST', headers: { 'Content-Type': 'application/json' } });
     clearInterval(interval);
     if (!res.ok) throw new Error('Generator request failed');
     const resData = await res.json();
-    loading.classList.remove('on');
-    btn.disabled = false;
+
+    localStorage.setItem('fou_gen_result', JSON.stringify(resData.carousels || []));
+    localStorage.removeItem('fou_generating');
+    _generatorRunning = false;
+
     data.lastGenerated = new Date().toISOString();
+    saveData();
     await loadFromBackend();
+
+    const genLoading = document.getElementById('gen-loading');
+    const genBtn = document.getElementById('gen-btn');
+    if (genLoading) genLoading.classList.remove('on');
+    if (genBtn) genBtn.disabled = false;
     renderGeneratorStats();
     renderGeneratedConcepts(resData.carousels || []);
   } catch(err) {
     clearInterval(interval);
-    loading.classList.remove('on');
-    btn.disabled = false;
-    results.innerHTML = `<div class="card"><div class="card-body" style="color:var(--red);">Generation failed: ${err.message}</div></div>`;
+    localStorage.removeItem('fou_generating');
+    _generatorRunning = false;
+    const genLoading = document.getElementById('gen-loading');
+    const genBtn = document.getElementById('gen-btn');
+    if (genLoading) genLoading.classList.remove('on');
+    if (genBtn) genBtn.disabled = false;
+    const r = document.getElementById('gen-results');
+    if (r) r.innerHTML = `<div class="card"><div class="card-body" style="color:var(--red);">Generation failed: ${err.message}</div></div>`;
+  }
+}
+
+function checkPendingGeneration() {
+  const savedResult = localStorage.getItem('fou_gen_result');
+  const isRunning = localStorage.getItem('fou_generating');
+
+  if (savedResult) {
+    localStorage.removeItem('fou_gen_result');
+    localStorage.removeItem('fou_generating');
+    const carousels = JSON.parse(savedResult);
+    const loading = document.getElementById('gen-loading');
+    const btn = document.getElementById('gen-btn');
+    if (loading) loading.classList.remove('on');
+    if (btn) btn.disabled = false;
+    renderGeneratedConcepts(carousels);
+  } else if (isRunning) {
+    const loading = document.getElementById('gen-loading');
+    const btn = document.getElementById('gen-btn');
+    const lt = document.getElementById('gen-loading-text');
+    if (loading) loading.classList.add('on');
+    if (btn) btn.disabled = true;
+    if (lt) lt.textContent = 'Generation in progress — come back in a moment...';
+    const poll = setInterval(() => {
+      const result = localStorage.getItem('fou_gen_result');
+      if (result) {
+        clearInterval(poll);
+        localStorage.removeItem('fou_gen_result');
+        localStorage.removeItem('fou_generating');
+        const carousels = JSON.parse(result);
+        const loading = document.getElementById('gen-loading');
+        const btn = document.getElementById('gen-btn');
+        if (loading) loading.classList.remove('on');
+        if (btn) btn.disabled = false;
+        renderGeneratedConcepts(carousels);
+      } else if (!localStorage.getItem('fou_generating')) {
+        clearInterval(poll);
+        const loading = document.getElementById('gen-loading');
+        const btn = document.getElementById('gen-btn');
+        if (loading) loading.classList.remove('on');
+        if (btn) btn.disabled = false;
+      }
+    }, 2000);
   }
 }
 
