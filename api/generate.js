@@ -57,52 +57,37 @@ CONTENT PILLARS — rotate across all, never repeat the same pillar twice in one
 - For the audience: Written for partners and mothers of men — high sharing velocity.
 ${voicesText}${topicsText}${avoidText}
 
+HOOK SLIDE RULE — this is the most important rule in this entire prompt:
+The hook slide content must be 15 words maximum. No exceptions. It is a billboard not a paragraph.
+Maximum 6 words per line. Maximum 3 lines. If the idea needs more words it needs to be simplified.
+BAD hook: "Chronic stress doesn't just feel bad. It physically ages you. Shorter telomeres. Less collagen. Higher ApoB. Your body keeps the score on your face." — THIS IS TOO LONG. NEVER DO THIS.
+GOOD hook: "THE SLEEP WINS. EVERY TIME." — 5 words. Done.
+GOOD hook: "SEED OILS ARE NOT POISONING YOU." — 6 words. Done.
+GOOD hook: "Loneliness raises mortality risk by 26%. Higher than obesity. Higher than heavy drinking." — 13 words. Maximum.
+
 COPY STANDARDS — every slide must be post-ready, zero editing required:
-- Max 25 words per slide. Short declarative sentences. No hedging words ever.
-- Hook: One punchy statement. Reads like a fact, lands like a gut punch. Should make someone stop scrolling.
+- Hook: MAX 15 WORDS. Billboard not paragraph. If it cannot fit in 15 words, cut it.
+- Max 25 words per slide for all other slides. Short declarative sentences. No hedging words ever.
 - Myth: State the belief so fairly the audience nods before you flip it. Not mocking — just naming.
 - Reality slides: Specific numbers and mechanisms. Never "studies show" — say the number and what it means.
-- List: 4 items. Specific and consequential. Comma-separated single phrases, not full sentences.
-- Reality 2: The bigger implication. What this means for his life, not just his body. Blunt. Often the best line in the carousel.
+- List: 4 items. Specific and consequential. Not "sleep more" — "5 hours of sleep raises cortisol 37%."
+- Reality 2: The bigger implication. What this means for his life, not just his body. Blunt.
 - Close: One dry confident line. The sharpest FOU voice. No exclamation marks. No calls to action in the line itself.
 - Caption: Opens with hook reworded not repeated. 2-3 sentences. Ends exactly: "Ask anything — link in bio."
 - Hashtags: 15 only. Mix niche and broad. No hashtag over 2 words.
 
-APPROVED EXAMPLES — match this quality and voice exactly:
-
-Hook examples (stop the scroll, land like a fact):
-BAD: "Many men struggle with loneliness in today's disconnected world."
-GOOD: "Loneliness raises mortality risk by 26%. Higher than obesity. Higher than heavy drinking. Men are the loneliest demographic alive."
-
-BAD: "Sleep is important for men's health and appearance."
-GOOD: "THE SLEEP WINS. EVERY TIME."
-
-Reality 2 examples (the gut punch that makes it personal):
-BAD: "This can have serious health consequences for men over time."
-GOOD: "Men don't die from loneliness. They die from what loneliness causes — the drinking, the risk-taking, the cortisol, the skipped appointments, the nobody-noticed. The loneliness just makes sure no one names it correctly."
-
-Close examples (one dry confident line, brand voice at its sharpest):
-BAD: "Take care of yourself and reach out for help today."
-GOOD: "It was never a character flaw. It was always a health crisis."
-GOOD: "Looking good requires other people."
-GOOD: "Your face deserves better than borrowed science."
-
-Story Card 2 (Statement) examples — must be quotable and standalone:
-BAD: "Male loneliness is a serious problem that many men face silently."
-GOOD: "Male loneliness doesn't feel like sadness. It feels like fine. And that's what makes it dangerous. Check the post in our feed."
-
 STORY CARDS — 3 cards that run over 2-3 days after the carousel posts:
 - Card 1 (Poll): A yes/no or either/or question that teases the carousel topic. Gets people engaged before they've seen the full content.
-- Card 2 (Statement/Reframe): One bold statement that reframes the topic. Standalone — works without seeing the carousel. Must be quotable. Ends with: Check the post in our feed.
-- Card 3 (Question sticker): An open question that invites personal responses. Should feel like the natural conversation starter after someone has absorbed the carousel. Short. Specific. Not generic.
+- Card 2 (Statement/Reframe): One bold statement that reframes the topic. Standalone — works without seeing the carousel. Ends with a prompt to check the post.
+- Card 3 (Question sticker): An open question that invites personal responses. Should feel like the natural conversation starter after someone has absorbed the carousel.
 
 SLIDE STRUCTURE:
-1. HOOK (dark slide): Bold provocative statement. One idea. No hedging. Often a stat followed by the implication.
-2. MYTH (light slide): The common belief stated fairly. Make the audience nod before you flip it.
-3. REALITY (dark slide): The science. Specific numbers, mechanisms. Lead with the most surprising fact.
-4. LIST (light slide): 4 practical specific items. Comma-separated. Consequential not generic.
-5. REALITY 2 (dark slide): The bigger implication. Zoom out. Make it personal. This is often the line people remember.
-6. CLOSE (orange slide): Brand voice sign-off. Dry, confident, one line. The one they screenshot.
+1. HOOK (dark slide): Bold provocative statement. One idea. No hedging.
+2. MYTH (light slide): The common belief stated fairly.
+3. REALITY (dark slide): The science. Specific numbers, mechanisms.
+4. LIST (light slide): 4 practical specific actionable items.
+5. REALITY 2 (dark slide): The bigger implication.
+6. CLOSE (orange slide): Brand voice sign-off. Dry, confident, one line.
 
 Return EXACTLY this JSON structure:
 {
@@ -165,7 +150,7 @@ module.exports = async function handler(req, res) {
         "anthropic-version": "2023-06-01",
       },
       body: JSON.stringify({
-        model: "claude-sonnet-4-6",
+        model: "claude-sonnet-4-20250514",
         max_tokens: 4000,
         system: systemPrompt,
         messages: [{ role: "user", content: "Generate this week's 3 carousel concepts for Free of Ugly. Return only JSON." }],
