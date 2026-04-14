@@ -57,17 +57,9 @@ CONTENT PILLARS — rotate across all, never repeat the same pillar twice in one
 - For the audience: Written for partners and mothers of men — high sharing velocity.
 ${voicesText}${topicsText}${avoidText}
 
-HOOK SLIDE RULE — this is the most important rule in this entire prompt:
-The hook slide content must be 15 words maximum. No exceptions. It is a billboard not a paragraph.
-Maximum 6 words per line. Maximum 3 lines. If the idea needs more words it needs to be simplified.
-BAD hook: "Chronic stress doesn't just feel bad. It physically ages you. Shorter telomeres. Less collagen. Higher ApoB. Your body keeps the score on your face." — THIS IS TOO LONG. NEVER DO THIS.
-GOOD hook: "THE SLEEP WINS. EVERY TIME." — 5 words. Done.
-GOOD hook: "SEED OILS ARE NOT POISONING YOU." — 6 words. Done.
-GOOD hook: "Loneliness raises mortality risk by 26%. Higher than obesity. Higher than heavy drinking." — 13 words. Maximum.
-
 COPY STANDARDS — every slide must be post-ready, zero editing required:
-- Hook: MAX 15 WORDS. Billboard not paragraph. If it cannot fit in 15 words, cut it.
-- Max 25 words per slide for all other slides. Short declarative sentences. No hedging words ever.
+- Max 25 words per slide. Short declarative sentences. No hedging words ever.
+- Hook: One punchy statement. Reads like a fact, lands like a gut punch. Should make someone stop scrolling.
 - Myth: State the belief so fairly the audience nods before you flip it. Not mocking — just naming.
 - Reality slides: Specific numbers and mechanisms. Never "studies show" — say the number and what it means.
 - List: 4 items. Specific and consequential. Not "sleep more" — "5 hours of sleep raises cortisol 37%."
@@ -128,6 +120,13 @@ module.exports = async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
 
   try {
+    // Auto-expire stale generated concepts older than 7 days
+    await supabase
+      .from("carousel_log")
+      .update({ status: "skipped" })
+      .eq("status", "generated")
+      .lt("date_created", new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString());
+
     const { data: topicsData } = await supabase.from("topic_bank").select("*").eq("status", "pending");
     const priorityOrder = { high: 0, normal: 1, low: 2 };
     const pendingTopics = (topicsData || [])
