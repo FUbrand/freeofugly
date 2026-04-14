@@ -74,12 +74,23 @@ STORY CARDS — 3 cards that run over 2-3 days after the carousel posts:
 - Card 3 (Question sticker): An open question that invites personal responses. Should feel like the natural conversation starter after someone has absorbed the carousel.
 
 SLIDE STRUCTURE:
-1. HOOK (dark slide): Bold provocative statement. One idea. No hedging.
+1. HOOK (dark slide): Bold provocative statement. One idea. No hedging. Max 15 words.
 2. MYTH (light slide): The common belief stated fairly.
 3. REALITY (dark slide): The science. Specific numbers, mechanisms.
-4. LIST (light slide): 4 practical specific actionable items.
+4. LIST (light slide): 4 practical specific actionable items. Comma-separated.
 5. REALITY 2 (dark slide): The bigger implication.
 6. CLOSE (orange slide): Brand voice sign-off. Dry, confident, one line.
+
+SLIDE TAGS — descriptive, never generic:
+Every slide needs a specific descriptive tag. Never use generic type labels.
+NEVER: "MYTH", "REALITY", "LIST", "HOOK", "CLOSE"
+ALWAYS use descriptive phrases:
+- Hook tag: e.g. "Nobody Told You This Was Killing You", "The Panic Is Real", "What They Won't Say"
+- Myth tag: e.g. "What You've Been Sold", "What The Culture Says", "What Most Men Believe"
+- Reality tag: e.g. "What The Science Says", "What The Trials Show", "What The Data Shows"
+- List tag: e.g. "What Actually Moves The Number", "What Changes The Outcome", "What It Actually Costs"
+- Reality 2 tag: e.g. "The Part No One Says Out Loud", "The Bigger Problem", "What The Industry Hides"
+- Close tag: Always exactly "Free of Ugly." — never changes
 
 Return EXACTLY this JSON structure:
 {
