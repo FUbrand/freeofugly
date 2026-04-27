@@ -67,6 +67,30 @@ module.exports = async function handler(req, res) {
     return res.status(500).json({ error: "Missing META_ACCESS_TOKEN or IG_BUSINESS_ACCOUNT_ID env vars" });
   }
 
+  // DEBUG MODE: visit /api/sync-instagram?debug=1 to see raw API responses
+  if (req.query?.debug === "1") {
+    try {
+      const media = await fetchAllMedia();
+      const firstPost = media[0];
+      const debugResults = {};
+      const metricsToTry = ["views", "reach", "total_interactions", "likes", "comments", "shares", "saved", "impressions", "profile_visits", "follows"];
+
+      for (const metric of metricsToTry) {
+        const url = `${META_API}/${firstPost.id}/insights?metric=${metric}&access_token=${META_TOKEN}`;
+        const r = await fetch(url);
+        const body = await r.text();
+        debugResults[metric] = { status: r.status, body: body.substring(0, 500) };
+      }
+
+      return res.status(200).json({
+        firstPost: { id: firstPost.id, media_type: firstPost.media_type, timestamp: firstPost.timestamp },
+        metricResults: debugResults
+      });
+    } catch (e) {
+      return res.status(500).json({ debug_error: e.message });
+    }
+  }
+
   try {
     const media = await fetchAllMedia();
     let updated = 0;
