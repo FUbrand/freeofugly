@@ -28,10 +28,9 @@ async function fetchAllMedia() {
 }
 
 async function fetchInsights(mediaId, mediaType) {
-  // Instagram deprecated several metrics — current valid set varies by media type
-  // For carousels (CAROUSEL_ALBUM): use views, reach, total_interactions, likes, comments, shares, saved
-  // For images (IMAGE): same as carousel
-  // Fetch one at a time to avoid one bad metric killing the whole call
+  // Instagram v22+ supported metrics for posts:
+  // views, reach, total_interactions, likes, comments, shares, saved, profile_visits, follows
+  // (impressions was deprecated in v22)
   const metricsToTry = ["views", "reach", "total_interactions", "likes", "comments", "shares", "saved", "profile_visits", "follows"];
   const out = {};
 
@@ -39,15 +38,17 @@ async function fetchInsights(mediaId, mediaType) {
     try {
       const url = `${META_API}/${mediaId}/insights?metric=${metric}&access_token=${META_TOKEN}`;
       const res = await fetch(url);
-      if (!res.ok) {
-        const errText = await res.text();
-        // Silently skip metrics that aren't supported for this media type
-        continue;
-      }
+      if (!res.ok) continue;
       const data = await res.json();
-      const value = data.data?.[0]?.values?.[0]?.value;
-      if (typeof value === "number") {
-        out[metric] = value;
+      // Response shape: { data: [{ name, values: [{ value }] }] }
+      if (data.data && data.data.length > 0) {
+        const item = data.data[0];
+        if (item.values && item.values.length > 0) {
+          const v = item.values[0].value;
+          if (v !== undefined && v !== null) {
+            out[metric] = v;
+          }
+        }
       }
     } catch (e) {
       // skip individual metric errors
@@ -116,19 +117,25 @@ module.exports = async function handler(req, res) {
         ig_permalink: post.permalink,
         ig_caption: post.caption,
         date: postedDate,
-        views: insights.views || insights.impressions || 0,
-        accounts_reached: insights.reach || 0,
-        impressions: insights.impressions || 0,
-        likes: insights.likes || 0,
-        comments: insights.comments || 0,
-        shares: insights.shares || 0,
-        saves: insights.saved || 0,
-        profile_visits: insights.profile_visits || 0,
-        follows_from_post: insights.follows || 0,
-        reach: insights.reach || 0,
+        views: insights.views ?? 0,
+        accounts_reached: insights.reach ?? 0,
+        impressions: 0,
+        likes: insights.likes ?? 0,
+        comments: insights.comments ?? 0,
+        shares: insights.shares ?? 0,
+        saves: insights.saved ?? 0,
+        profile_visits: insights.profile_visits ?? 0,
+        follows_from_post: insights.follows ?? 0,
+        reach: insights.reach ?? 0,
         last_synced: new Date().toISOString(),
         status: "posted"
       };
+
+      // Debug log first post
+      if (media.indexOf(post) === 0) {
+        console.log("First post insights:", JSON.stringify(insights));
+        console.log("First post payload:", JSON.stringify(payload));
+      }
 
       if (existing) {
         const { error } = await supabase.from("posts").update(payload).eq("id", existing.id);
@@ -151,7 +158,8 @@ module.exports = async function handler(req, res) {
       total: media.length,
       inserted,
       updated,
-      errors: errors.length ? errors : undefined
+      errors: errors.length ? errors : undefined,
+      sampleFirstPostInsights: media.length > 0 ? await fetchInsights(media[0].id, media[0].media_type) : null
     });
   } catch (err) {
     console.error("Sync error:", err);
