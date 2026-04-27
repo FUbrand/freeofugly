@@ -1,0 +1,131 @@
+const { createClient } = require("@supabase/supabase-js");
+
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_KEY
+);
+
+const META_TOKEN = process.env.META_ACCESS_TOKEN;
+const IG_ACCOUNT_ID = process.env.IG_BUSINESS_ACCOUNT_ID;
+const META_API = "https://graph.facebook.com/v21.0";
+
+async function fetchAllMedia() {
+  const allPosts = [];
+  let url = `${META_API}/${IG_ACCOUNT_ID}/media?fields=id,caption,media_type,permalink,timestamp&limit=50&access_token=${META_TOKEN}`;
+
+  while (url) {
+    const res = await fetch(url);
+    if (!res.ok) {
+      const errText = await res.text();
+      throw new Error(`Meta media fetch failed: ${res.status} ${errText}`);
+    }
+    const data = await res.json();
+    if (data.data) allPosts.push(...data.data);
+    url = data.paging?.next || null;
+  }
+
+  return allPosts;
+}
+
+async function fetchInsights(mediaId) {
+  // Different metrics for different media types — using broad set, ignore failures per metric
+  const metrics = ["views", "reach", "impressions", "likes", "comments", "shares", "saved", "profile_visits", "follows"];
+  const url = `${META_API}/${mediaId}/insights?metric=${metrics.join(",")}&access_token=${META_TOKEN}`;
+
+  try {
+    const res = await fetch(url);
+    if (!res.ok) {
+      const errText = await res.text();
+      console.warn(`Insights failed for ${mediaId}: ${errText}`);
+      return {};
+    }
+    const data = await res.json();
+    const out = {};
+    (data.data || []).forEach(m => {
+      out[m.name] = m.values?.[0]?.value || 0;
+    });
+    return out;
+  } catch (e) {
+    console.warn(`Insights error for ${mediaId}:`, e.message);
+    return {};
+  }
+}
+
+module.exports = async function handler(req, res) {
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+
+  if (req.method === "OPTIONS") return res.status(200).end();
+
+  if (!META_TOKEN || !IG_ACCOUNT_ID) {
+    return res.status(500).json({ error: "Missing META_ACCESS_TOKEN or IG_BUSINESS_ACCOUNT_ID env vars" });
+  }
+
+  try {
+    const media = await fetchAllMedia();
+    let updated = 0;
+    let inserted = 0;
+    const errors = [];
+
+    for (const post of media) {
+      const insights = await fetchInsights(post.id);
+      const postedDate = post.timestamp ? post.timestamp.split("T")[0] : null;
+
+      // Try to extract topic from existing post or first line of caption
+      const topicFromCaption = post.caption ? post.caption.split("\n")[0].substring(0, 80) : "";
+
+      // Check if this IG post already exists
+      const { data: existing } = await supabase
+        .from("posts")
+        .select("id")
+        .eq("ig_post_id", post.id)
+        .maybeSingle();
+
+      const payload = {
+        ig_post_id: post.id,
+        ig_permalink: post.permalink,
+        ig_caption: post.caption,
+        date: postedDate,
+        views: insights.views || insights.impressions || 0,
+        accounts_reached: insights.reach || 0,
+        impressions: insights.impressions || 0,
+        likes: insights.likes || 0,
+        comments: insights.comments || 0,
+        shares: insights.shares || 0,
+        saves: insights.saved || 0,
+        profile_visits: insights.profile_visits || 0,
+        follows_from_post: insights.follows || 0,
+        reach: insights.reach || 0,
+        last_synced: new Date().toISOString(),
+        status: "posted"
+      };
+
+      if (existing) {
+        const { error } = await supabase.from("posts").update(payload).eq("id", existing.id);
+        if (error) errors.push({ id: post.id, error: error.message });
+        else updated++;
+      } else {
+        const { error } = await supabase.from("posts").insert({
+          ...payload,
+          topic: topicFromCaption || "Untitled",
+          pillar: "unknown",
+          followers: 0
+        });
+        if (error) errors.push({ id: post.id, error: error.message });
+        else inserted++;
+      }
+    }
+
+    return res.status(200).json({
+      success: true,
+      total: media.length,
+      inserted,
+      updated,
+      errors: errors.length ? errors : undefined
+    });
+  } catch (err) {
+    console.error("Sync error:", err);
+    return res.status(500).json({ error: err.message });
+  }
+};
