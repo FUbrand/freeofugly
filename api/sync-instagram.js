@@ -27,28 +27,33 @@ async function fetchAllMedia() {
   return allPosts;
 }
 
-async function fetchInsights(mediaId) {
-  // Different metrics for different media types — using broad set, ignore failures per metric
-  const metrics = ["views", "reach", "impressions", "likes", "comments", "shares", "saved", "profile_visits", "follows"];
-  const url = `${META_API}/${mediaId}/insights?metric=${metrics.join(",")}&access_token=${META_TOKEN}`;
+async function fetchInsights(mediaId, mediaType) {
+  // Instagram deprecated several metrics — current valid set varies by media type
+  // For carousels (CAROUSEL_ALBUM): use views, reach, total_interactions, likes, comments, shares, saved
+  // For images (IMAGE): same as carousel
+  // Fetch one at a time to avoid one bad metric killing the whole call
+  const metricsToTry = ["views", "reach", "total_interactions", "likes", "comments", "shares", "saved", "profile_visits", "follows"];
+  const out = {};
 
-  try {
-    const res = await fetch(url);
-    if (!res.ok) {
-      const errText = await res.text();
-      console.warn(`Insights failed for ${mediaId}: ${errText}`);
-      return {};
+  for (const metric of metricsToTry) {
+    try {
+      const url = `${META_API}/${mediaId}/insights?metric=${metric}&access_token=${META_TOKEN}`;
+      const res = await fetch(url);
+      if (!res.ok) {
+        const errText = await res.text();
+        // Silently skip metrics that aren't supported for this media type
+        continue;
+      }
+      const data = await res.json();
+      const value = data.data?.[0]?.values?.[0]?.value;
+      if (typeof value === "number") {
+        out[metric] = value;
+      }
+    } catch (e) {
+      // skip individual metric errors
     }
-    const data = await res.json();
-    const out = {};
-    (data.data || []).forEach(m => {
-      out[m.name] = m.values?.[0]?.value || 0;
-    });
-    return out;
-  } catch (e) {
-    console.warn(`Insights error for ${mediaId}:`, e.message);
-    return {};
   }
+  return out;
 }
 
 module.exports = async function handler(req, res) {
@@ -69,7 +74,7 @@ module.exports = async function handler(req, res) {
     const errors = [];
 
     for (const post of media) {
-      const insights = await fetchInsights(post.id);
+      const insights = await fetchInsights(post.id, post.media_type);
       const postedDate = post.timestamp ? post.timestamp.split("T")[0] : null;
 
       // Try to extract topic from existing post or first line of caption
