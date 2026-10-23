@@ -73,7 +73,7 @@
 
   .shelf-link {
     font-family: 'Space Mono', monospace;
-    font-size: 10px;
+    font-size: 12px;
     letter-spacing: 0.12em;
     text-transform: uppercase;
     color: var(--orange);
@@ -86,7 +86,7 @@
   @media (max-width: 600px) {
     .header { padding: 0.75rem 1.25rem; }
     .header-tag { display: none; }
-    .shelf-link { font-size: 9px; letter-spacing: 0.04em; text-align: right; margin-left: 1rem; max-width: 55%; }
+    .shelf-link { font-size: 12px; letter-spacing: 0.1em; margin-left: 1rem; white-space: nowrap; }
     .hero { padding: 1.25rem 1rem 0.75rem; }
     .hero-headline { font-size: clamp(20px, 7vw, 34px) !important; margin-bottom: 0.75rem !important; }
     .hero-sub { font-size: 13px; margin-bottom: 0.5rem !important; }
@@ -395,7 +395,7 @@
   <header class="header">
     <div class="logo">Free of Ugly<span>.</span></div>
     <div class="header-tag">Science over grift — always</div>
-    <a class="shelf-link" href="/shelf/">The Shelf &mdash; sources for every post</a>
+    <a class="shelf-link" href="/shelf/" title="Sources for every post">The Shelf</a>
   </header>
 
   <div class="hero" id="hero">
