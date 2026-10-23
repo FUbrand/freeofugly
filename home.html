@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Free of Ugly | Get the science. Skip the sales pitch.</title>
+<meta name="description" content="Men's health and grooming, evidence first, price-honest, quality over cheap. Read The Shelf: the sources and the math behind every post. No affiliate links.">
+<link rel="canonical" href="https://freeofugly.co/">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='48' fill='%230D0D0B'/><text x='50' y='68' text-anchor='middle' font-family='Arial Black,Arial,sans-serif' font-weight='900' font-size='44' fill='%234C9A6E' letter-spacing='-3'>FU</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,800&family=DM+Sans:wght@400;500;600&family=Instrument+Serif:ital@0;1&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0D0D0B;
+    --ink-2: #191917;
+    --cream: #F5F2EA;
+    --off: #F0EDE4;
+    --green: #1F4D3A;
+    --sig: #4C9A6E;
+    --tint: #E4EDE6;
+    --red: #D93A2E;
+    --grey: #9A9890;
+    --grey-d: #55534F;
+    --line-d: #2A2A26;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { background: var(--ink); }
+  body {
+    background: var(--ink);
+    color: var(--off);
+    font: 400 17px/1.6 'DM Sans', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+  a { color: inherit; }
+
+  /* Brand voices */
+  .cnd { font-family: 'Archivo', sans-serif; font-stretch: 72%; font-weight: 800; text-transform: uppercase; line-height: .93; letter-spacing: -.005em; }
+  .ser { font-family: 'Instrument Serif', serif; line-height: 1.0; letter-spacing: -.01em; }
+  .ser i { font-style: italic; }
+  .lab { font: 700 12px 'Space Mono', monospace; letter-spacing: .14em; text-transform: uppercase; }
+
+  .wrap { max-width: 720px; margin: 0 auto; padding: 0 20px; }
+
+  /* HEADER + LOGO */
+  .header { border-bottom: 3px solid var(--off); }
+  .header .wrap { display: flex; align-items: center; justify-content: space-between; padding-top: 14px; padding-bottom: 14px; }
+  .logo { display: inline-grid; justify-items: start; text-decoration: none; color: var(--off); line-height: 1; }
+  .logo .ser { font-style: italic; font-size: 25px; margin-left: 2px; }
+  .logo .ser b { font-weight: 400; color: var(--sig); }
+  .logo .cnd { position: relative; display: inline-block; font-size: 52px; line-height: .8; margin-top: 1px; }
+  .logo .cnd b { font-weight: 800; color: var(--sig); }
+  .logo .cnd::after { content: ""; position: absolute; left: -2%; right: -2%; top: 46%; height: 6px; background: var(--red); transform: rotate(-4deg); }
+  .shelf-link { font: 700 13px 'Space Mono', monospace; letter-spacing: .12em; text-transform: uppercase; color: var(--sig); text-decoration: none; border-bottom: 2px solid var(--sig); padding-bottom: 2px; white-space: nowrap; }
+  .shelf-link:hover { color: var(--off); border-color: var(--off); }
+
+  /* HERO */
+  .hero { padding: 40px 0 18px; }
+  .hero-tag { display: inline-block; background: var(--sig); color: var(--ink); padding: 6px 14px; border-radius: 20px; margin-bottom: 18px; }
+  .hero-headline { margin-bottom: 18px; }
+  .hero-headline .cnd { display: block; font-size: clamp(46px, 13vw, 92px); }
+  .hero-headline .ser { display: block; font-size: clamp(44px, 12.5vw, 88px); margin-top: 6px; color: var(--off); }
+  .hero-headline .ser i { color: var(--sig); }
+  .hero-sub { font-size: 19px; line-height: 1.5; color: var(--off); max-width: 34em; }
+
+  .what { border-top: 3px solid var(--off); padding: 28px 0 40px; }
+  .what .lab { color: var(--sig); margin-bottom: 10px; }
+  .what p { font-size: 19px; line-height: 1.5; max-width: 34em; }
+
+  /* FROM THE SHELF */
+  .shelf { background: var(--cream); color: var(--ink); padding: 44px 0 52px; }
+  .shelf-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; border-bottom: 3px solid var(--ink); padding-bottom: 14px; margin-bottom: 14px; }
+  .shelf-head h2 { font-size: clamp(34px, 9vw, 52px); }
+  .shelf-head h2 .ser { display: block; font-size: .7em; text-transform: none; font-weight: 400; margin-bottom: 4px; }
+  .shelf-head h2 .ser i { color: var(--green); }
+  .see-all { font: 700 13px 'Space Mono', monospace; letter-spacing: .12em; text-transform: uppercase; color: var(--green); text-decoration: none; border-bottom: 2px solid var(--green); padding-bottom: 2px; white-space: nowrap; }
+  .shelf-sub { color: var(--grey-d); margin-bottom: 22px; }
+  .cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; list-style: none; }
+  .card { display: flex; flex-direction: column; border: 3px solid var(--ink); background: var(--cream); text-decoration: none; color: var(--ink); height: 100%; }
+  .card:hover { background: var(--tint); }
+  .card img { display: block; width: 100%; height: auto; aspect-ratio: 2 / 3; background: var(--tint); border-bottom: 3px solid var(--ink); }
+  .card .lab { color: var(--green); font-size: 11px; padding: 10px 10px 0; }
+  .card .t { font: 600 15px/1.3 'DM Sans', sans-serif; padding: 4px 10px 12px; }
+  .shelf-foot { margin-top: 24px; }
+
+  /* FOOTER */
+  .footer { padding: 32px 0 40px; border-top: 3px solid var(--off); }
+  .footer p { font: 400 13px/1.7 'Space Mono', monospace; color: var(--grey); margin-bottom: 8px; }
+  .footer .links { display: flex; flex-wrap: wrap; gap: 8px 22px; margin: 14px 0; }
+  .footer .links a { font: 700 13px 'Space Mono', monospace; letter-spacing: .12em; text-transform: uppercase; color: var(--sig); text-decoration: none; border-bottom: 2px solid var(--sig); padding-bottom: 2px; }
+  .footer .links a:hover { color: var(--off); border-color: var(--off); }
+  .footer .noaff { color: var(--off); }
+
+  @media (min-width: 640px) {
+    .cards { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
+    .wrap { padding: 0 28px; }
+    .logo .ser { font-size: 30px; }
+    .logo .cnd { font-size: 62px; }
+    .logo .cnd::after { height: 8px; }
+  }
+  @media (min-width: 1000px) {
+    .wrap { max-width: 980px; }
+    .hero { max-width: 720px; }
+    .cards { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+  }
+  @media (prefers-reduced-motion: reduce) {  }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="wrap">
+    <a class="logo" href="/" aria-label="Free of Ugly, home">
+      <span class="ser"><b>F</b>ree of</span>
+      <span class="cnd"><b>U</b>GLY</span>
+    </a>
+    <a class="shelf-link" href="/shelf/" title="Sources for every post">The Shelf</a>
+  </div>
+</header>
+
+<main>
+<section class="wrap">
+  <div class="hero" id="hero">
+    <h1 class="hero-headline"><span class="cnd">Get the science.</span><span class="ser">Skip the sales <i>pitch.</i></span></h1>
+    <p class="hero-sub">Men's health and grooming, evidence first, price-honest, quality over cheap.</p>
+  </div>
+</section>
+
+<section class="wrap">
+  <div class="what">
+    <div class="lab">What we do</div>
+    <p>We read the studies and check the prices, then tell you what is worth buying. No affiliate links, so nobody pays us to say yes.</p>
+  </div>
+</section>
+
+<section class="shelf" id="shelf">
+  <div class="wrap">
+    <div class="shelf-head">
+      <h2 class="cnd"><span class="ser">From the</span>Shelf</h2>
+      <a class="see-all" href="/shelf/">See all</a>
+    </div>
+    <p class="shelf-sub">The sources, the math and the full answer behind every Free of Ugly post.</p>
+    <ul class="cards">
+      <li><a class="card" href="/shelf/creatine-which-kind-to-buy"><img src="/shelf/img/creatine-which-kind-to-buy.png" alt="Cream card titled Creatine: what&#x27;s worth buying. Plain monohydrate, worth it, 34 cents a day. Tested for banned substances, worth it if you are drug-tested, 49 cents a day. Kre-Alkalyn, no edge." width="1000" height="1500" loading="lazy" decoding="async"><span class="lab">The Verdict</span><span class="t">Creatine: which kind is worth buying</span></a></li>
+      <li><a class="card" href="/shelf/electric-toothbrush-worth-it"><img src="/shelf/img/electric-toothbrush-worth-it.png" alt="Cream card comparing a manual toothbrush at about 1 cent a day with an electric toothbrush at about 15 to 18 cents a day. Cochrane 2014: 21 percent less plaque, 11 percent less gingivitis after 3 months. Verdict: modest edge." width="1000" height="1500" loading="lazy" decoding="async"><span class="lab">The Verdict</span><span class="t">Electric toothbrush vs manual: worth about $63 a year?</span></a></li>
+      <li><a class="card" href="/shelf/biotin-for-hair-worth-it"><img src="/shelf/img/biotin-for-hair-worth-it.png" alt="Cream card titled Biotin for hair growth with a red SKIP mark. A review found 18 cases and all had an underlying cause. The US Food and Drug Administration has received reports that biotin caused falsely low troponin results. About 6 cents a day." width="1000" height="1500" loading="lazy" decoding="async"><span class="lab">The Verdict</span><span class="t">Biotin for hair growth: skip it unless you are actually low</span></a></li>
+      <li><a class="card" href="/shelf/multivitamin-for-men-worth-it"><img src="/shelf/img/multivitamin-for-men-worth-it.png" alt="Cream card titled Multivitamin for men. Preventing heart disease or cancer: unproven per the US Preventive Services Task Force. Centrum Men at 10 cents a day: fine if you want one. Thorne Basic Nutrients at $1.33 a day, tested for banned substances per Thorne." width="1000" height="1500" loading="lazy" decoding="async"><span class="lab">The Verdict</span><span class="t">Multivitamin for men: what the evidence says and what it costs</span></a></li>
+      <li><a class="card" href="/shelf/rosemary-oil-hair-loss-study"><img src="/shelf/img/rosemary-oil-hair-loss-study.png" alt="Cream card titled As good as minoxidil, read the study. 100 patients, 6 months, rosemary oil versus 2 percent minoxidil, no difference at month 3 or 6, no placebo group. Verdict: one small trial, promising not proven." width="1000" height="1500" loading="lazy" decoding="async"><span class="lab">What the Study Actually Found</span><span class="t">Rosemary oil for hair loss: what the study actually found</span></a></li>
+      <li><a class="card" href="/shelf/creatine-hair-loss-study"><img src="/shelf/img/creatine-hair-loss-study.png" alt="Cream card titled Does creatine cause hair loss. 2009: 20 rugby players, the hormone DHT up 56 percent, hair not measured. 2025: 45 men, 12 weeks, no difference in DHT or hair measures versus placebo." width="1000" height="1500" loading="lazy" decoding="async"><span class="lab">What the Study Actually Found</span><span class="t">Does creatine cause hair loss? What the studies actually found</span></a></li>
+      <li><a class="card" href="/shelf/skincare-routine-for-men-graded"><img src="/shelf/img/skincare-routine-for-men-graded.png" alt="Cream card titled Skincare routine for men, graded. A: daily sunscreen. G, guidance only: mild cleanser, moisturizer. B: prescription tretinoin. C: niacinamide 5 percent. 0, no benefit: beta-carotene pills for skin." width="1000" height="1500" loading="lazy" decoding="async"><span class="lab">The Graded Routine</span><span class="t">Skincare routine for men, graded by the evidence</span></a></li>
+      <li><a class="card" href="/shelf/sunscreen-cost-per-day"><img src="/shelf/img/sunscreen-cost-per-day.png" alt="Cream card with bars showing sunscreen cost per day at the dermatologist-recommended dose of 1 teaspoon for the face: CeraVe AM SPF 30 at $1.11, La Roche-Posay Anthelios Light Fluid SPF 60 at $2.65, EltaMD UV Clear SPF 46 at $4.51." width="1000" height="1500" loading="lazy" decoding="async"><span class="lab">Price Per Use</span><span class="t">What sunscreen costs per day at the dose dermatologists recommend</span></a></li>
+      <li><a class="card" href="/shelf/sunscreen-label-decoder"><img src="/shelf/img/sunscreen-label-decoder.png" alt="Cream card titled What your sunscreen label is allowed to say. Broad spectrum means it passed the FDA&#x27;s test for UVA (skin-aging) rays. Water resistant must say 40 or 80 minutes. Waterproof, sweatproof and sunblock are banned. Dermatologists say SPF 30 plus and at least 1 teaspoon for the face." width="1000" height="1500" loading="lazy" decoding="async"><span class="lab">Label Decoder</span><span class="t">Sunscreen for men: how to read the label</span></a></li>
+      <li><a class="card" href="/shelf/niacinamide-serum-for-men"><img src="/shelf/img/niacinamide-serum-for-men.png" alt="Cream two-column card titled Niacinamide. Does, in one 12-week trial at 5 percent: fewer fine lines, fewer dark spots, less redness, less sallowness. Not shown in the abstracts: pore size, results in men, replacing sunscreen, that higher percentages are better." width="1000" height="1500" loading="lazy" decoding="async"><span class="lab">Ingredient Card</span><span class="t">Niacinamide serum for men: what it does and what it doesn&#x27;t</span></a></li>
+    </ul>
+    <p class="shelf-foot"><a class="see-all" href="/shelf/">See all on The Shelf</a></p>
+  </div>
+</section>
+</main>
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="links">
+      <a href="/shelf/">The Shelf</a>
+      <a href="https://www.instagram.com/freeofugly/" rel="noopener">Instagram @freeofugly</a>
+    </div>
+    <p class="noaff">No affiliate links. Nobody paid us to write this.</p>
+    <p>Not medical advice. Always verify with a qualified professional.</p>
+  </div>
+</footer>
+
+</body>
+</html>
