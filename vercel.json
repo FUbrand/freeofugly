@@ -2,6 +2,9 @@
   "rewrites": [
     { "source": "/", "destination": "/freeofugly_ask.html" },
     { "source": "/dashboard", "destination": "/FreeOfUgly_Dashboard.html" },
+    { "source": "/shelf", "destination": "/shelf/index.html" },
+    { "source": "/shelf/", "destination": "/shelf/index.html" },
+    { "source": "/shelf/:slug", "destination": "/shelf/:slug.html" },
     { "source": "/api/(.*)", "destination": "/api/$1" }
   ],
   "functions": {
